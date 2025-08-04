@@ -1,6 +1,6 @@
 # Modernization Advantages: Apigee X & Hybrid vs. Legacy Edge OPDK
 
-Apigee X and Hybrid are Google's premier API management platforms, engineered on a modern, cloud-native foundation. For organizations currently using the legacy Apigee Edge Private Cloud (OPDK), migrating to Apigee X or Hybrid offers transformative benefits in operational efficiency, security posture, and the speed of innovation. This move allows you to shift resources from platform maintenance to mission-critical objectives.
+**[Apigee X](https://cloud.google.com/blog/products/api-management/apigee-x-google-clouds-more-powerful-api-management-platform)** and **[Apigee Hybrid](https://cloud.google.com/apigee/hybrid?hl=en)** are Google's premier API management platforms, engineered on a modern, cloud-native foundation. For organizations currently using the legacy Apigee Edge Private Cloud (OPDK), migrating to Apigee X or Hybrid offers transformative benefits in operational efficiency, security posture, and the speed of innovation. This move allows you to shift resources from platform maintenance to mission-critical objectives.
 
 ## 1. Dramatically Lower Operational Overhead & Enhanced Scalability 📉
 
@@ -35,11 +35,11 @@ Both platforms allow you to rapidly provision new organizations and environments
 
 **Available in Apigee X Add-on**:
 
-**[Advanced API Security](https://cloud.google.com/apigee/docs/api-platform/security/api-security-overview)** uses machine learning to provide security capabilities unavailable in Edge. It continuously monitors your API traffic to:
+**[Advanced API Security](https://cloud.google.com/apigee/docs/api-security)** uses machine learning to provide security capabilities unavailable in Edge. It continuously monitors your API traffic to:
 
-- **Detect and Block Bots**: Identifies and provides reports on malicious bot traffic, including brute force guessers and credential stuffers. [Learn more about bot detection](https://cloud.google.com/apigee/docs/api-platform/security/api-security-bot-detection).
-- **Identify Misconfigurations**: Automatically assesses your API configurations and scores them against Apigee best practices to proactively identify potential risks. [Explore security scoring](https://cloud.google.com/apigee/docs/api-platform/security/api-security-scoring).
-- **Find Anomalies**: Generates alerts on unusual traffic patterns, such as sudden spikes in 500 errors or latency, that static threshold-based alerting might miss. [Understand anomaly detection](https://cloud.google.com/apigee/docs/api-platform/security/api-security-anomaly-detection).
+- **Abuse Detection**: Identifies and provides reports on malicious bot traffic, including brute force guessers and credential stuffers. [Learn more about abuse detection](https://cloud.google.com/apigee/docs/api-security/abuse-detection).
+- **Identify Misconfigurations**: Automatically assesses your API configurations and scores them against Apigee best practices to proactively identify potential risks. [Explore risk assessment](https://cloud.google.com/apigee/docs/api-security/security-scores) and [security reports](https://cloud.google.com/apigee/docs/api-security/security-report-jobs).
+- **Find Anomalies**: Generates alerts on unusual traffic patterns, such as sudden spikes in 500 errors or latency, that static threshold-based alerting might miss. [Understand anomaly detection](https://cloud.google.com/apigee/docs/aapi-ops/about-anomaly-detection).
 
 ### 2.3 Multi-Layered API & Web Application Defense
 
@@ -48,7 +48,7 @@ Both platforms allow you to rapidly provision new organizations and environments
 Because the Apigee X runtime and ingress are managed by Google, it allows for seamless, one-click integrations with other Google Cloud security services for a robust defense-in-depth strategy:
 
 - **[Cloud Armor](https://cloud.google.com/armor)**: A global scale Web Application Firewall (WAF) and DDoS mitigation service that can be placed in front of your Apigee-managed APIs. [Learn about Apigee integration](https://cloud.google.com/apigee/docs/api-platform/security/cloud-armor-integration).
-- **[reCAPTCHA Enterprise](https://cloud.google.com/recaptcha-enterprise)**: Integrates to protect your APIs from fraudulent activity, spam, and other forms of abuse. [Explore reCAPTCHA with Apigee](https://cloud.google.com/apigee/docs/api-platform/security/recaptcha-integration).
+- **[reCAPTCHA Enterprise](https://cloud.google.com/recaptcha-enterprise)**: Integrates to protect your APIs from fraudulent activity, spam, and other forms of abuse. [Explore reCAPTCHA with Apigee](https://cloud.google.com/blog/products/identity-security/how-to-secure-apis-against-fraud-and-abuse-with-recaptcha-enterprise-and-apigee-x).
 
 ## 3. Accelerated Developer Velocity & Modernization 🚀
 
@@ -57,8 +57,8 @@ Because the Apigee X runtime and ingress are managed by Google, it allows for se
 **Available in Apigee X & Hybrid**:
 
 - Go beyond simple passthrough. Apigee provides native policies to treat GraphQL as a first-class citizen, a capability not present in Edge.
-- **Scope of Support**: You can validate incoming GraphQL requests against an uploaded schema and parse GraphQL query payloads into variables that can be used in other policies. [Learn about GraphQL validation](https://cloud.google.com/apigee/docs/api-platform/fundamentals/graphql-validation).
-- **[GraphQL Overview](https://cloud.google.com/apigee/docs/api-platform/fundamentals/graphql-overview)** | **[GraphQL Policy Reference](https://cloud.google.com/apigee/docs/api-platform/reference/policies/graphql-policy)**
+- **Scope of Support**: You can validate incoming GraphQL requests against an uploaded schema and parse GraphQL query payloads into variables that can be used in other policies. [Learn about GraphQL validation](https://cloud.google.com/apigee/docs/api-platform/develop/graphql).
+- **[GraphQL Overview](https://cloud.google.com/apigee/docs/api-platform/develop/graphql)** | **[GraphQL Policy Reference](https://cloud.google.com/apigee/docs/api-platform/reference/policies/graphql-policy)**
 
 ### 3.2 gRPC Support
 
@@ -78,21 +78,21 @@ Leverage Google's Gemini models directly within the Apigee platform to accelerat
 
 **Available in Apigee X & Hybrid**:
 
-- The **[Apigee Integration](https://cloud.google.com/apigee/docs/api-platform/integration/integration-overview)** add-on provides a powerful, low-code solution to orchestrate and connect to a multitude of backend systems without writing extensive custom code. You can set an Apigee Integration as the target of an API proxy.
-- It includes a vast library of pre-built connectors to Google Cloud services, SaaS platforms (Salesforce, ServiceNow), and enterprise systems. This is a core differentiator not available in Edge. [Explore available connectors](https://cloud.google.com/apigee/docs/api-platform/integration/connectors-overview).
-- **[Integration Overview](https://cloud.google.com/apigee/docs/api-platform/integration/integration-overview)** | **[Connectors Reference](https://cloud.google.com/apigee/docs/api-platform/integration/connectors-overview)**
+- The **[Application Integration](https://cloud.google.com/application-integration/docs/overview)** add-on provides a powerful, low-code solution to orchestrate and connect to a multitude of backend systems without writing extensive custom code. You can set an Application Integration as the target of an API proxy.
+- It includes a vast library of pre-built connectors to Google Cloud services, SaaS platforms (Salesforce, ServiceNow), and enterprise systems. This is a core differentiator not available in Edge. [Explore available connectors](https://cloud.google.com/integration-connectors/docs/all-integration-connectors).
+- **[Application Integration Overview](https://cloud.google.com/application-integration/docs/overview)** | **[Integration Connectors Overview](https://cloud.google.com/integration-connectors/docs/overview)**
 
 ### 3.5 Modern Local Development
 
 **Available in Apigee X & Hybrid**:
 
-Empower developers with a VS Code plugin that allows them to develop, debug, and test API proxies on their local workstations. This enables modern CI/CD practices and is a significant improvement over the web-UI-only development in Edge. [Get started with local development](https://cloud.google.com/apigee/docs/api-platform/local-development) and [install the VS Code extension](https://cloud.google.com/apigee/docs/api-platform/local-development/vscode-extension).
+Empower developers with a VS Code plugin that allows them to develop, debug, and test API proxies on their local workstations. This enables modern CI/CD practices and is a significant improvement over the web-UI-only development in Edge. [Get started with local development](https://cloud.google.com/apigee/docs/api-platform/local-development) and [install the VS Code extension](https://cloud.google.com/apigee/docs/api-platform/local-development/setup).
 
 ### 3.6 Centralized API Governance with API Hub
 
 **Available in Apigee X & Hybrid**:
 
-**[API Hub](https://cloud.google.com/apigee/docs/api-platform/api-hub/overview)** acts as a single, centralized registry for all of your organization's APIs, regardless of whether they are managed by Apigee, implemented in other gateways, or built by third parties. This provides comprehensive visibility and governance over your entire API landscape. [Learn about API governance](https://cloud.google.com/apigee/docs/api-platform/api-hub/governance) and [API discovery features](https://cloud.google.com/apigee/docs/api-platform/api-hub/discovery).
+**[API Hub](https://cloud.google.com/apigee/docs/apihub/what-is-api-hub)** acts as a single, centralized registry for all of your organization's APIs, regardless of whether they are managed by Apigee, implemented in other gateways, or built by third parties. This provides comprehensive visibility and governance over your entire API landscape. [Learn about API discovery features](https://cloud.google.com/apigee/docs/api-observation/shadow-api-discovery).
 
 ### 3.7 Native WebSocket Support
 
@@ -112,7 +112,7 @@ This represents a significant improvement over Edge OPDK's limited WebSocket cap
 
 **Available in Apigee X & Hybrid**:
 
-**[Apigee Integrated Portal](https://cloud.google.com/apigee/docs/api-platform/publish/portal/overview)** provides a built-in developer portal solution that was not available in Edge Private Cloud (OPDK), though it was present in Edge Public Cloud (SaaS). Key capabilities include:
+**[Apigee Integrated Portal](https://cloud.google.com/apigee/docs/api-platform/publish/portal/build-integrated-portal)** provides a built-in developer portal solution that was not available in Edge Private Cloud (OPDK), though it was present in Edge Public Cloud (SaaS). Key capabilities include:
 
 - **Built-in Portal Management**: Create and manage developer portals directly within the Apigee platform without requiring separate infrastructure or third-party solutions.
 - **API Documentation**: Automatically generate and maintain API documentation from your API proxy configurations and OpenAPI specifications.
@@ -120,7 +120,7 @@ This represents a significant improvement over Edge OPDK's limited WebSocket cap
 - **Customizable Branding**: Customize the portal appearance and branding to match your organization's identity.
 - **Analytics Integration**: Track portal usage and developer engagement through integrated analytics.
 
-**FedRAMP Considerations**: The integrated portal is not within the FedRAMP authorization boundary. For FedRAMP-compliant environments, consider using the **[Apigee Drupal-based portal solution](https://cloud.google.com/apigee/docs/api-platform/publish/drupal/overview)**, which can be deployed within your authorized boundary and provides similar functionality with enhanced security controls.
+**FedRAMP Considerations**: The integrated portal is not within the FedRAMP authorization boundary. For FedRAMP-compliant environments, consider using the **[Apigee Drupal-based portal solution](https://cloud.google.com/apigee/docs/api-platform/publish/drupal/overview)** or explore other **[portal options](https://cloud.google.com/apigee/docs/api-platform/publish/intro-portals)**, which can be deployed within your authorized boundary and provides similar functionality with enhanced security controls.
 
 ### 3.9 New, Exclusive Policies
 
