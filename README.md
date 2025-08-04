@@ -4,7 +4,7 @@ This repository contains comprehensive guides and documentation for Apigee API m
 
 ## Contents
 
-- **edge-vs-x-hybrid.md**: Detailed comparison guide between Apigee Edge OPDK and modern Apigee X & Hybrid platforms, highlighting migration benefits and feature differences.
+- **[edge-vs-x-hybrid.md](edge-vs-x-hybrid.md)**: Detailed comparison guide between Apigee Edge OPDK and modern Apigee X & Hybrid platforms, highlighting migration benefits and feature differences.
 
 ## Overview
 
