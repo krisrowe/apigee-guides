@@ -62,11 +62,15 @@ Because the Apigee X runtime and ingress are managed by Google, it allows for se
 
 ### 3.2 gRPC Support
 
-**Available in Apigee X & Hybrid**:
+**Southbound gRPC Support**:
 
-- **Southbound gRPC calls**: Apigee supports making gRPC calls from API proxies to backend services using the ExternalCallout policy with full TLS support and authentication capabilities.
-- **Extension processor support**: Apigee provides extension processor capabilities that can be used to handle gRPC traffic patterns and implement custom gRPC logic.
-- **[External Callout Policy](https://cloud.google.com/apigee/docs/api-platform/reference/policies/external-callout-policy)** | **[Extension Processor Overview](https://cloud.google.com/apigee/docs/api-platform/service-extensions/extension-processor-overview)**
+- **Available in Apigee X & Hybrid**: Both platforms support making gRPC calls from API proxies to backend services using the ExternalCallout policy with full TLS support and authentication capabilities.
+- **[External Callout Policy](https://cloud.google.com/apigee/docs/api-platform/reference/policies/external-callout-policy)**
+
+**Northbound gRPC Support**:
+
+- **Available in Apigee X Only**: Extension processors provide capabilities to handle gRPC traffic patterns and implement custom gRPC logic, which may enable northbound gRPC support through custom implementation. Extension processors require Google Cloud Load Balancer integration and are not available in Hybrid.
+- **[Extension Processor Overview](https://cloud.google.com/apigee/docs/api-platform/service-extensions/extension-processor-overview)**
 
 ### 3.3 AI-Powered Development with Gemini
 
