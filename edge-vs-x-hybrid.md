@@ -50,6 +50,12 @@ Because the Apigee X runtime and ingress are managed by Google, it allows for se
 - **[Cloud Armor](https://cloud.google.com/armor)**: A global scale Web Application Firewall (WAF) and DDoS mitigation service that can be placed in front of your Apigee-managed APIs. [Learn about Apigee integration](https://cloud.google.com/apigee/docs/api-platform/security/cloud-armor-integration).
 - **[reCAPTCHA Enterprise](https://cloud.google.com/recaptcha-enterprise)**: Integrates to protect your APIs from fraudulent activity, spam, and other forms of abuse. [Explore reCAPTCHA with Apigee](https://cloud.google.com/blog/products/identity-security/how-to-secure-apis-against-fraud-and-abuse-with-recaptcha-enterprise-and-apigee-x).
 
+### 2.4 CORS Support
+
+**Available in Apigee X & Hybrid**:
+
+- **CORS Policy Support**: Native Cross-Origin Resource Sharing (CORS) policy support for handling cross-origin requests and responses, essential for modern web applications and preventing unauthorized cross-origin access.
+
 ## 3. Accelerated Developer Velocity & Modernization 🚀
 
 ### 3.1 Native GraphQL Support
@@ -125,4 +131,25 @@ This represents a significant improvement over Edge OPDK's limited WebSocket cap
 - **Analytics Integration**: Track portal usage and developer engagement through integrated analytics.
 
 **FedRAMP Considerations**: The integrated portal is not within the FedRAMP authorization boundary. For FedRAMP-compliant environments, consider using the **[Apigee Drupal-based portal solution](https://cloud.google.com/apigee/docs/api-platform/publish/drupal/overview)** or explore other **[portal options](https://cloud.google.com/apigee/docs/api-platform/publish/intro-portals)**, which can be deployed within your authorized boundary and provides similar functionality with enhanced security controls.
+
+## 4. Google Cloud Ecosystem Capabilities 🌐
+
+### 4.1 AI & Machine Learning Capabilities
+
+**Available in Apigee X & Hybrid**:
+
+- **Semantic Caching**: AI-powered semantic caching capabilities that understand the meaning of requests and responses, enabling more intelligent caching strategies beyond simple key-value matching. Includes [Semantic Cache Lookup](https://cloud.google.com/apigee/docs/api-platform/reference/policies/semantic-cache-lookup-policy) and [Semantic Cache Populate](https://cloud.google.com/apigee/docs/api-platform/reference/policies/semantic-cache-populate-policy) policies.
+- **AI Safety Policies**: [SanitizeUserPrompt](https://cloud.google.com/apigee/docs/api-platform/reference/policies/sanitize-user-prompt-policy) and [SanitizeLLMResponse](https://cloud.google.com/apigee/docs/api-platform/reference/policies/sanitize-llm-response-policy) policies for sanitizing user inputs and model outputs to ensure AI safety.
+
+### 4.2 Google Cloud Service Capabilities
+
+**Available in Apigee X & Hybrid**:
+
+- **PublishMessage Policy**: Enables integration with Google Cloud Pub/Sub for asynchronous messaging and event-driven architectures.
+- **VerifyIAM Policy**: Provides integration with Google Cloud IAM for fine-grained access control and policy enforcement using service accounts. [Learn more about VerifyIAM policy](https://cloud.google.com/apigee/docs/api-platform/reference/policies/verify-iam-policy).
+
+**Available in Apigee X Only**:
+
+- **Dialog Flow Policies**: Enables integration with Google Cloud Dialogflow for conversational AI and chatbot capabilities. [Explore Contact Center AI integration](https://cloud.google.com/apigee/docs/api-platform/develop/integrating-apigee-contact-center-ai).
+- **Service Account Integration**: Enhanced support for Google Cloud service accounts for secure, automated authentication and authorization.
 
