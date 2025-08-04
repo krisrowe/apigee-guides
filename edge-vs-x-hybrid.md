@@ -35,11 +35,11 @@ Both platforms allow you to rapidly provision new organizations and environments
 
 **Available in Apigee X Add-on**:
 
-**Advanced API Security** uses machine learning to provide security capabilities unavailable in Edge. It continuously monitors your API traffic to:
+**[Advanced API Security](https://cloud.google.com/apigee/docs/api-platform/security/api-security-overview)** uses machine learning to provide security capabilities unavailable in Edge. It continuously monitors your API traffic to:
 
-- **Detect and Block Bots**: Identifies and provides reports on malicious bot traffic, including brute force guessers and credential stuffers.
-- **Identify Misconfigurations**: Automatically assesses your API configurations and scores them against Apigee best practices to proactively identify potential risks.
-- **Find Anomalies**: Generates alerts on unusual traffic patterns, such as sudden spikes in 500 errors or latency, that static threshold-based alerting might miss.
+- **Detect and Block Bots**: Identifies and provides reports on malicious bot traffic, including brute force guessers and credential stuffers. [Learn more about bot detection](https://cloud.google.com/apigee/docs/api-platform/security/api-security-bot-detection).
+- **Identify Misconfigurations**: Automatically assesses your API configurations and scores them against Apigee best practices to proactively identify potential risks. [Explore security scoring](https://cloud.google.com/apigee/docs/api-platform/security/api-security-scoring).
+- **Find Anomalies**: Generates alerts on unusual traffic patterns, such as sudden spikes in 500 errors or latency, that static threshold-based alerting might miss. [Understand anomaly detection](https://cloud.google.com/apigee/docs/api-platform/security/api-security-anomaly-detection).
 
 ### 2.3 Multi-Layered API & Web Application Defense
 
@@ -47,8 +47,8 @@ Both platforms allow you to rapidly provision new organizations and environments
 
 Because the Apigee X runtime and ingress are managed by Google, it allows for seamless, one-click integrations with other Google Cloud security services for a robust defense-in-depth strategy:
 
-- **Cloud Armor**: A global scale Web Application Firewall (WAF) and DDoS mitigation service that can be placed in front of your Apigee-managed APIs.
-- **reCAPTCHA Enterprise**: Integrates to protect your APIs from fraudulent activity, spam, and other forms of abuse.
+- **[Cloud Armor](https://cloud.google.com/armor)**: A global scale Web Application Firewall (WAF) and DDoS mitigation service that can be placed in front of your Apigee-managed APIs. [Learn about Apigee integration](https://cloud.google.com/apigee/docs/api-platform/security/cloud-armor-integration).
+- **[reCAPTCHA Enterprise](https://cloud.google.com/recaptcha-enterprise)**: Integrates to protect your APIs from fraudulent activity, spam, and other forms of abuse. [Explore reCAPTCHA with Apigee](https://cloud.google.com/apigee/docs/api-platform/security/recaptcha-integration).
 
 ## 3. Accelerated Developer Velocity & Modernization 🚀
 
@@ -57,8 +57,8 @@ Because the Apigee X runtime and ingress are managed by Google, it allows for se
 **Available in Apigee X & Hybrid**:
 
 - Go beyond simple passthrough. Apigee provides native policies to treat GraphQL as a first-class citizen, a capability not present in Edge.
-- **Scope of Support**: You can validate incoming GraphQL requests against an uploaded schema and parse GraphQL query payloads into variables that can be used in other policies.
-- **Public Documentation**: https://cloud.google.com/apigee/docs/api-platform/fundamentals/graphql-overview
+- **Scope of Support**: You can validate incoming GraphQL requests against an uploaded schema and parse GraphQL query payloads into variables that can be used in other policies. [Learn about GraphQL validation](https://cloud.google.com/apigee/docs/api-platform/fundamentals/graphql-validation).
+- **[GraphQL Overview](https://cloud.google.com/apigee/docs/api-platform/fundamentals/graphql-overview)** | **[GraphQL Policy Reference](https://cloud.google.com/apigee/docs/api-platform/reference/policies/graphql-policy)**
 
 ### 3.2 gRPC Support
 
@@ -66,35 +66,49 @@ Because the Apigee X runtime and ingress are managed by Google, it allows for se
 
 - **Southbound gRPC calls**: Apigee supports making gRPC calls from API proxies to backend services using the ExternalCallout policy with full TLS support and authentication capabilities.
 - **Extension processor support**: Apigee provides extension processor capabilities that can be used to handle gRPC traffic patterns and implement custom gRPC logic.
-- **Public Documentation**: [External Callout Policy](https://cloud.google.com/apigee/docs/api-platform/reference/policies/external-callout-policy), [Extension Processor Overview](https://cloud.google.com/apigee/docs/api-platform/service-extensions/extension-processor-overview)
+- **[External Callout Policy](https://cloud.google.com/apigee/docs/api-platform/reference/policies/external-callout-policy)** | **[Extension Processor Overview](https://cloud.google.com/apigee/docs/api-platform/service-extensions/extension-processor-overview)**
 
 ### 3.3 AI-Powered Development with Gemini
 
 **Available in Apigee X & Hybrid**:
 
-Leverage Google's Gemini models directly within the Apigee platform to accelerate development. Gemini can assist with creating API proxy logic, building complex integration flows, and automatically generating data mappings, reducing manual effort and potential errors.
+Leverage Google's Gemini models directly within the Apigee platform to accelerate development. Gemini can assist with creating API proxy logic, building complex integration flows, and automatically generating data mappings, reducing manual effort and potential errors. [Explore Gemini integration](https://cloud.google.com/apigee/docs/api-platform/ai-ml/gemini-integration) and [AI-powered development features](https://cloud.google.com/apigee/docs/api-platform/ai-ml/ai-development-overview).
 
 ### 3.4 API-First Integration & Connectors
 
 **Available in Apigee X & Hybrid**:
 
-- The **Apigee Integration** add-on provides a powerful, low-code solution to orchestrate and connect to a multitude of backend systems without writing extensive custom code. You can set an Apigee Integration as the target of an API proxy.
-- It includes a vast library of pre-built connectors to Google Cloud services, SaaS platforms (Salesforce, ServiceNow), and enterprise systems. This is a core differentiator not available in Edge.
-- **Public Documentation**: https://cloud.google.com/apigee/docs/api-platform/integration/integration-overview
+- The **[Apigee Integration](https://cloud.google.com/apigee/docs/api-platform/integration/integration-overview)** add-on provides a powerful, low-code solution to orchestrate and connect to a multitude of backend systems without writing extensive custom code. You can set an Apigee Integration as the target of an API proxy.
+- It includes a vast library of pre-built connectors to Google Cloud services, SaaS platforms (Salesforce, ServiceNow), and enterprise systems. This is a core differentiator not available in Edge. [Explore available connectors](https://cloud.google.com/apigee/docs/api-platform/integration/connectors-overview).
+- **[Integration Overview](https://cloud.google.com/apigee/docs/api-platform/integration/integration-overview)** | **[Connectors Reference](https://cloud.google.com/apigee/docs/api-platform/integration/connectors-overview)**
 
 ### 3.5 Modern Local Development
 
 **Available in Apigee X & Hybrid**:
 
-Empower developers with a VS Code plugin that allows them to develop, debug, and test API proxies on their local workstations. This enables modern CI/CD practices and is a significant improvement over the web-UI-only development in Edge.
+Empower developers with a VS Code plugin that allows them to develop, debug, and test API proxies on their local workstations. This enables modern CI/CD practices and is a significant improvement over the web-UI-only development in Edge. [Get started with local development](https://cloud.google.com/apigee/docs/api-platform/local-development) and [install the VS Code extension](https://cloud.google.com/apigee/docs/api-platform/local-development/vscode-extension).
 
 ### 3.6 Centralized API Governance with API Hub
 
 **Available in Apigee X & Hybrid**:
 
-API Hub acts as a single, centralized registry for all of your organization's APIs, regardless of whether they are managed by Apigee, implemented in other gateways, or built by third parties. This provides comprehensive visibility and governance over your entire API landscape.
+**[API Hub](https://cloud.google.com/apigee/docs/api-platform/api-hub/overview)** acts as a single, centralized registry for all of your organization's APIs, regardless of whether they are managed by Apigee, implemented in other gateways, or built by third parties. This provides comprehensive visibility and governance over your entire API landscape. [Learn about API governance](https://cloud.google.com/apigee/docs/api-platform/api-hub/governance) and [API discovery features](https://cloud.google.com/apigee/docs/api-platform/api-hub/discovery).
 
-### 3.7 New, Exclusive Policies
+### 3.7 Native WebSocket Support
+
+**Available in Apigee X & Hybrid**:
+
+**[WebSocket support](https://cloud.google.com/apigee/docs/api-platform/develop/websocket-config)** is natively available in both Apigee X and Hybrid through environment groups that support both HTTP and WS protocols. Key capabilities include:
+
+- **Protocol Upgrade Handling**: Clients can request protocol upgrade from HTTP to WebSocket using the `Upgrade` header, with API proxies returning `101 Switching Protocols` responses.
+- **Policy Execution During Handshake**: All policies work during the WebSocket handshake until the `HTTP 101` response is returned, including authentication and authorization policies.
+- **OAuth Token Validation**: OAuth tokens validated before handshake completion remain honored throughout the WebSocket session, with connections dropped if tokens expire or are revoked.
+- **Connection Management**: WebSocket connections are automatically closed for requests without valid API keys or OAuth tokens, or when connections timeout.
+- **Debug and Analytics**: WebSocket connections appear in the Debug tool with `101 Status`, and analytics dashboard tracks WebSocket sessions.
+
+This represents a significant improvement over Edge OPDK's limited WebSocket capabilities and enables real-time applications like gaming, communications, and financial transactions.
+
+### 3.8 New, Exclusive Policies
 
 **Available in Apigee X & Hybrid**:
 
