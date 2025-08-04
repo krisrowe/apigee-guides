@@ -108,7 +108,21 @@ Empower developers with a VS Code plugin that allows them to develop, debug, and
 
 This represents a significant improvement over Edge OPDK's limited WebSocket capabilities and enables real-time applications like gaming, communications, and financial transactions.
 
-### 3.8 New, Exclusive Policies
+### 3.8 Integrated Developer Portal
+
+**Available in Apigee X & Hybrid**:
+
+**[Apigee Integrated Portal](https://cloud.google.com/apigee/docs/api-platform/publish/portal/overview)** provides a built-in developer portal solution that was not available in Edge Private Cloud (OPDK), though it was present in Edge Public Cloud (SaaS). Key capabilities include:
+
+- **Built-in Portal Management**: Create and manage developer portals directly within the Apigee platform without requiring separate infrastructure or third-party solutions.
+- **API Documentation**: Automatically generate and maintain API documentation from your API proxy configurations and OpenAPI specifications.
+- **Developer Self-Service**: Enable developers to discover, explore, and register for API access through a self-service portal.
+- **Customizable Branding**: Customize the portal appearance and branding to match your organization's identity.
+- **Analytics Integration**: Track portal usage and developer engagement through integrated analytics.
+
+**FedRAMP Considerations**: The integrated portal is not within the FedRAMP authorization boundary. For FedRAMP-compliant environments, consider using the **[Apigee Drupal-based portal solution](https://cloud.google.com/apigee/docs/api-platform/publish/drupal/overview)**, which can be deployed within your authorized boundary and provides similar functionality with enhanced security controls.
+
+### 3.9 New, Exclusive Policies
 
 **Available in Apigee X & Hybrid**:
 
