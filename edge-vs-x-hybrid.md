@@ -126,8 +126,3 @@ This represents a significant improvement over Edge OPDK's limited WebSocket cap
 
 **FedRAMP Considerations**: The integrated portal is not within the FedRAMP authorization boundary. For FedRAMP-compliant environments, consider using the **[Apigee Drupal-based portal solution](https://cloud.google.com/apigee/docs/api-platform/publish/drupal/overview)** or explore other **[portal options](https://cloud.google.com/apigee/docs/api-platform/publish/intro-portals)**, which can be deployed within your authorized boundary and provides similar functionality with enhanced security controls.
 
-### 3.9 New, Exclusive Policies
-
-**Available in Apigee X & Hybrid**:
-
-The modern platform includes policies not found in Edge, such as the `GraphQL` policy and gRPC ExternalCallout support, which help manage modern API traffic patterns.
