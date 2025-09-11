@@ -79,9 +79,9 @@ If you want to enforce additional policies like quota limits after identificatio
 ```
 <Quota name="QU-ProductQuota">
     <DisplayName>QU-ProductQuota</DisplayName>
-    <Allow count="3" countRef="verifyapikey.Verify-API-Key-1.apiproduct.developer.quota.limit"/>
-    <Interval ref="verifyapikey.Verify-API-Key-1.apiproduct.developer.quota.interval">1</Interval>
-    <TimeUnit ref="verifyapikey.Verify-API-Key-1.apiproduct.developer.quota.timeunit">minute</TimeUnit>
+    <Allow count="100" countRef="verifyapikey.VA-VerifyKeyFromJWTClaim.apiproduct.developer.quota.limit"/>
+    <Interval ref="verifyapikey.VA-VerifyKeyFromJWTClaim.apiproduct.developer.quota.interval">1</Interval>
+    <TimeUnit ref="verifyapikey.VA-VerifyKeyFromJWTClaim.apiproduct.developer.quota.timeunit">minute</TimeUnit>
     <Distributed>true</Distributed>
     <Synchronous>true</Synchronous>
 </Quota>
