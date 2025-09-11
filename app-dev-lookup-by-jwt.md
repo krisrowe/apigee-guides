@@ -49,9 +49,13 @@ Use this method when the JWT from your identity provider includes the Apigee **C
 
 ```
 
-3. AssignMessage Policy (Example)
+**3. Post-Identification Actions (Examples)**
 
-This policy reads the context variables set by VerifyAPIKey and adds them as headers.
+Once you've successfully identified and loaded the developer/app context, you can now take various actions. Here are two common examples:
+
+**Example A: Pass App Info to Backend (Simple Confirmation)**
+
+If all you need to do is confirm the app is registered and pass identifying information to your backend:
 
 ```
 <AssignMessage name="AM-AddAppInfoToTarget">
@@ -66,7 +70,64 @@ This policy reads the context variables set by VerifyAPIKey and adds them as hea
     </Set>
     <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
 </AssignMessage>
+```
 
+**Example B: Enforce Quota (Additional Validation)**
+
+If you want to enforce additional policies like quota limits after identification:
+
+```
+<Quota name="Q-EnforceAppQuota">
+    <DisplayName>Q-EnforceAppQuota</DisplayName>
+    <Allow count="1000" countRef="apiproduct.quota"/>
+    <Interval ref="apiproduct.interval">1</Interval>
+    <TimeUnit ref="apiproduct.timeunit">hour</TimeUnit>
+    <Distributed>true</Distributed>
+    <Synchronous>true</Synchronous>
+    <Identifier ref="developer.app.name"/>
+</Quota>
+```
+
+**Complete Proxy Flow Configuration (Scenario A)**
+
+Here's how to configure the proxy flow to execute these policies in the correct sequence:
+
+```xml
+<ProxyEndpoint name="default">
+    <PreFlow name="PreFlow">
+        <Request>
+            <Step>
+                <Name>JWT-VerifyToken</Name>
+            </Step>
+            <Step>
+                <Name>VA-VerifyKeyFromJWTClaim</Name>
+            </Step>
+            <Step>
+                <Name>AM-AddAppInfoToTarget</Name>
+            </Step>
+            <!-- Optional: Add quota enforcement -->
+            <Step>
+                <Name>Q-EnforceAppQuota</Name>
+            </Step>
+        </Request>
+    </PreFlow>
+    <PostFlow name="PostFlow">
+        <Response/>
+    </PostFlow>
+    <Flows>
+        <Flow name="default">
+            <Request/>
+            <Response/>
+        </Flow>
+    </Flows>
+    <HTTPProxyConnection>
+        <BasePath>/api/v1</BasePath>
+        <VirtualHost>default</VirtualHost>
+    </HTTPProxyConnection>
+    <RouteRule name="default">
+        <TargetEndpoint>default</TargetEndpoint>
+    </RouteRule>
+</ProxyEndpoint>
 ```
 
 #### **Scenario B: Indirect Lookup (Using a KVM)**
@@ -103,9 +164,39 @@ Use this method when the JWT contains a unique identifier (like a `user_id`) but
 
 _(Assumes the KVM policy stored the key in `private.retrieved_client_id`)_
 
-4. AssignMessage Policy (Example)
+4. Post-Identification Actions
 
-The same AssignMessage policy from Scenario A would work here, as the VerifyAPIKey policy populates the same context variables regardless of how it got the key.
+The same post-identification actions from Scenario A apply here—you can pass app info to the backend, enforce quotas, or implement any other policies you need. The VerifyAPIKey policy populates the same context variables regardless of how it got the key.
+
+**Complete Proxy Flow Configuration (Scenario B)**
+
+Here's the flow configuration for the KVM-based lookup:
+
+```xml
+<ProxyEndpoint name="default">
+    <PreFlow name="PreFlow">
+        <Request>
+            <Step>
+                <Name>JWT-VerifyToken</Name>
+            </Step>
+            <Step>
+                <Name>KVM-GetConsumerKey</Name>
+            </Step>
+            <Step>
+                <Name>VA-VerifyKeyFromKVM</Name>
+            </Step>
+            <Step>
+                <Name>AM-AddAppInfoToTarget</Name>
+            </Step>
+            <!-- Optional: Add quota enforcement -->
+            <Step>
+                <Name>Q-EnforceAppQuota</Name>
+            </Step>
+        </Request>
+    </PreFlow>
+    <!-- Rest of proxy configuration same as Scenario A -->
+</ProxyEndpoint>
+```
 
 ### **Alternative Pattern: Using the `OAuthV2` Policy**
 
@@ -135,7 +226,7 @@ This policy, when configured for external authorization, is **purpose-built** fo
 
 ```
 
-After this policy runs, the same `developer.app.name`, `developer.email`, etc., variables are available, and you can use the same `AssignMessage` policy to pass them to the backend.
+After this policy runs, the same `developer.app.name`, `developer.email`, etc., variables are available, and you can use the same post-identification actions (passing app info to backend, enforcing quotas, etc.) as described in Scenario A.
 
 ### **Comparison: `VerifyAPIKey` vs. `OAuthV2`**
 

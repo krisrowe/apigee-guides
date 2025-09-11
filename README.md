@@ -1,27 +1,36 @@
 # Apigee Guides
 
-This repository contains comprehensive guides and documentation for Apigee API management platform.
+This repository contains comprehensive guides for Apigee API management platform.
 
-## Contents
+## Apigee Edge vs X & Hybrid Comparison Guide
 
-- **[edge-vs-x-hybrid.md](edge-vs-x-hybrid.md)**: Detailed comparison guide between Apigee Edge OPDK and modern Apigee X & Hybrid platforms, highlighting migration benefits and feature differences.
-- **[app-dev-lookup-by-jwt.md](app-dev-lookup-by-jwt.md)**: Technical guide for using JWT claims to identify developer applications in Apigee, covering both direct and indirect lookup patterns with VerifyAPIKey and OAuthV2 policies.
+**[Read the full guide →](edge-vs-x-hybrid.md)**
 
-## Overview
-
-These guides are designed to help organizations understand the advantages of migrating from legacy Apigee Edge Private Cloud (OPDK) to modern Apigee X and Hybrid platforms. The documentation covers:
+This guide helps organizations understand the advantages of upgrading from Apigee Edge to modern Apigee X and Hybrid platforms. It covers:
 
 - Operational efficiency improvements
 - Security enhancements
 - Developer velocity and modernization features
-- Migration benefits and considerations
+- Platform comparison and upgrade considerations
+
+## JWT-Based App Identification Guide
+
+**[Read the full guide →](app-dev-lookup-by-jwt.md)**
+
+This technical guide demonstrates how to use JWT claims to identify developer applications in Apigee, enabling centralized identity provider integration while leveraging Apigee's API management features. It covers:
+
+- Direct lookup patterns using JWT claims
+- Indirect lookup patterns using Key-Value Maps
+- Policy configurations for VerifyAPIKey and OAuthV2
+- Complete proxy flow examples
 
 ## Target Audience
 
-- Apigee Edge OPDK users considering migration
+- Apigee platform users and administrators
 - Enterprise architects and decision makers
 - API platform administrators
-- Development teams evaluating platform upgrades
+- Development teams working with Apigee
+- Technical teams implementing API management solutions
 
 ## Contributing
 
