@@ -146,9 +146,33 @@ Use this method when the JWT contains a unique identifier (like a `user_id`) but
 
 **Policy Configurations:**
 
-1. VerifyJWT & 2. KVM-GetConsumerKey
+**1. VerifyJWT Policy**
 
-(These policies are the same as in the original guide)
+```
+<VerifyJWT name="JWT-VerifyToken">
+    <DisplayName>JWT-VerifyToken</DisplayName>
+    <Algorithm>RS256</Algorithm>
+    <Source>request.header.authorization</Source>
+    <PublicKey>
+        <JWKS uri="https://your-idp.com/.well-known/jwks.json"/>
+    </PublicKey>
+</VerifyJWT>
+```
+
+**2. KeyValueMapOperations Policy**
+
+```
+<KeyValueMapOperations name="KVM-GetConsumerKey">
+    <DisplayName>KVM-GetConsumerKey</DisplayName>
+    <Get assignTo="private.retrieved_client_id" index="1">
+        <Key>
+            <Parameter ref="jwt.claim.user_id"/>
+        </Key>
+    </Get>
+    <Scope>environment</Scope>
+    <MapIdentifier>user-to-client-mapping</MapIdentifier>
+</KeyValueMapOperations>
+```
 
 **3. VerifyAPIKey Policy**
 
@@ -160,8 +184,6 @@ Use this method when the JWT contains a unique identifier (like a `user_id`) but
 </VerifyAPIKey>
 
 ```
-
-_(Assumes the KVM policy stored the key in `private.retrieved_client_id`)_
 
 4. Post-Identification Actions
 
