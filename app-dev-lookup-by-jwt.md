@@ -77,14 +77,13 @@ If all you need to do is confirm the app is registered and pass identifying info
 If you want to enforce additional policies like quota limits after identification:
 
 ```
-<Quota name="Q-EnforceAppQuota">
-    <DisplayName>Q-EnforceAppQuota</DisplayName>
-    <Allow count="1000" countRef="apiproduct.quota"/>
-    <Interval ref="apiproduct.interval">1</Interval>
-    <TimeUnit ref="apiproduct.timeunit">hour</TimeUnit>
+<Quota name="QU-ProductQuota">
+    <DisplayName>QU-ProductQuota</DisplayName>
+    <Allow count="3" countRef="verifyapikey.Verify-API-Key-1.apiproduct.developer.quota.limit"/>
+    <Interval ref="verifyapikey.Verify-API-Key-1.apiproduct.developer.quota.interval">1</Interval>
+    <TimeUnit ref="verifyapikey.Verify-API-Key-1.apiproduct.developer.quota.timeunit">minute</TimeUnit>
     <Distributed>true</Distributed>
     <Synchronous>true</Synchronous>
-    <Identifier ref="developer.app.name"/>
 </Quota>
 ```
 
@@ -107,7 +106,7 @@ Here's how to configure the proxy flow to execute these policies in the correct 
             </Step>
             <!-- Optional: Add quota enforcement -->
             <Step>
-                <Name>Q-EnforceAppQuota</Name>
+                <Name>QU-ProductQuota</Name>
             </Step>
         </Request>
     </PreFlow>
@@ -190,7 +189,7 @@ Here's the flow configuration for the KVM-based lookup:
             </Step>
             <!-- Optional: Add quota enforcement -->
             <Step>
-                <Name>Q-EnforceAppQuota</Name>
+                <Name>QU-ProductQuota</Name>
             </Step>
         </Request>
     </PreFlow>
