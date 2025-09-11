@@ -185,7 +185,7 @@ Use this method when the JWT contains a unique identifier (like a `user_id`) but
 
 ```
 
-4. Post-Identification Actions
+**4. Post-Identification Actions**
 
 The same post-identification actions from Scenario A apply here—you can pass app info to the backend, enforce quotas, or implement any other policies you need. The VerifyAPIKey policy populates the same context variables regardless of how it got the key.
 
