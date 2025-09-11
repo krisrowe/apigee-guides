@@ -5,6 +5,7 @@ This repository contains comprehensive guides and documentation for Apigee API m
 ## Contents
 
 - **[edge-vs-x-hybrid.md](edge-vs-x-hybrid.md)**: Detailed comparison guide between Apigee Edge OPDK and modern Apigee X & Hybrid platforms, highlighting migration benefits and feature differences.
+- **[app-dev-lookup-by-jwt.md](app-dev-lookup-by-jwt.md)**: Technical guide for using JWT claims to identify developer applications in Apigee, covering both direct and indirect lookup patterns with VerifyAPIKey and OAuthV2 policies.
 
 ## Overview
 
