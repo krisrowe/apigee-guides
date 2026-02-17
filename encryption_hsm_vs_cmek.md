@@ -44,13 +44,12 @@ HSM is a **Protection Level** for an encryption key within the Cloud KMS service
 
 Apigee X partitions encryption between management data (Control Plane) and traffic data (Runtime).
 
-### Control Plane Data (Data Residency / DRZ)
-When Data Residency is enforced, the regionalized control plane requires **two distinct keys**.
-> *"In the regionalized Apigee control plane, you select two encryption keys for your control plane. This is because some of the components underlying the Apigee control plane are always in a single-region within the control plane location."*
-[Introduction to CMEK (Apigee X)](https://cloud.google.com/apigee/docs/api-platform/get-started/cmek-concepts)
+### Control Plane Data (Data residency regions)
+In the regionalized Apigee control plane, you select **two encryption keys** for your control plane. This is because some of the components underlying the Apigee control plane are always in a single-region within the control plane location.
 
-1. **Control plane encryption key:** Protects proxy bundles, environment config, and analytics signals.
-2. **API consumer data encryption key:** Protects sub-regional services.
+1.  **One key for control plane data:** Protects proxy configuration and analytics storage.
+2.  **One key for control plane sub-region data:** Protects sub-region components (e.g., analytics processing, portals) which are always in a single-region within the control plane location.
+    *   **Nuance:** While *stored* and encrypted by the control plane key, proxy bundles are cached and re-protected by Runtime keys (Disk/Database) during execution on the runtime plane.
 
 ### Runtime Data (Database vs. Disk)
 Runtime data encryption is multi-layered and requires strict isolation.
@@ -72,11 +71,16 @@ Runtime data encryption is multi-layered and requires strict isolation.
 | **Protection** | Software-based (KMS default) | **Hardware-backed (FIPS 140-2 L3)** |
 | **Complexity** | Low (standard KMS) | Low (identical API, requires `HSM` flag) |
 | **Cost (Key/Mo)** | **$0.06** | **$1.00** |
-| **Throughput (QPM)**| **~60,000 (Default)** | **~3,000 (Default)** |
+| **Throughput (QPM)**| **~60,000 (Exempted*)** | **~30,000 (Strict limit)** |
 | **Latency** | Low (Internal Software) | Slightly Higher (HSM Cluster Routing) |
 
-**Notes on "Expensiveness":**
-Beyond the ~16x higher monthly key fee, HSM is considered "expensive" due to its **significantly lower throughput quotas**. Software keys typically scale to 60k Queries Per Minute (QPM), whereas HSM keys default to 3k QPM. For high-volume banking workloads, this may necessitate quota increase requests or multi-key architectures.
+**The "Expensive" Reality:**
+Beyond the ~16x higher monthly key fee, HSM is considered "expensive" due to its **hardware-bound throughput quotas**. Software-backed keys are often exempted from CMEK integration quotas, whereas HSM keys face hard caps:
+- **Symmetric Operations:** ~30,000 QPM per region.
+- **Asymmetric/MAC Operations:** As low as **3,000 QPM** (a 20x reduction vs software).
+
+**Scaling Strategy: "Multi-Key Architecture" (Sharding)**
+To bypass these hardware limits, high-volume institutions use a **sharding pattern**—distributing workloads across multiple projects or regions to pool quotas (e.g., getting multiple 30k QPM buckets). This is an official recommendation for high-traffic environments.
 - **Source:** [Cloud KMS Pricing](https://cloud.google.com/kms/pricing), [Cloud KMS Quotas](https://cloud.google.com/kms/docs/quotas)
 
 ---
