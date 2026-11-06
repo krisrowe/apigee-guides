@@ -1,0 +1,24 @@
+title: Architecture & Security Guides for Apigee & Enterprise AI Gateways
+description: Independent technical architecture guides, protocol deep dives, and open-source reference implementations for Apigee X, Apigee Hybrid, and MCP Gateways
+markdown: kramdown
+kramdown:
+  input: GFM
+  hard_wrap: false
+plugins:
+  - jekyll-relative-links
+  - jekyll-readme-index
+  - jekyll-titles-from-headings
+relative_links:
+  enabled: true
+  collections: false
+titles_from_headings:
+  enabled: true
+  strip_title: false
+exclude:
+  - CONTRIBUTING.md
+  - LICENSE
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default

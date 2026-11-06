@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <title>{{ page.title | default: site.title | escape }}</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #0f172a;
+      --muted: #475569;
+      --border: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --surface: #f8fafc;
+      --nav-bg: #0f172a;
+      --nav-fg: #f8fafc;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --table-stripe: #f8fafc;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+      font-size: 15.5px;
+      line-height: 1.65;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    .topbar {
+      background: var(--nav-bg);
+      color: var(--nav-fg);
+      padding: 14px 28px;
+      border-bottom: 1px solid #1e293b;
+    }
+    .topbar-inner {
+      max-width: 1360px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .topbar .brand {
+      color: var(--nav-fg);
+      text-decoration: none;
+      font-weight: 650;
+      font-size: 15px;
+      letter-spacing: -0.01em;
+    }
+    .topbar .brand:hover { color: #93c5fd; }
+    .topbar .back-link {
+      color: #93c5fd;
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 500;
+    }
+    .topbar .back-link:hover { text-decoration: underline; }
+    main.container {
+      max-width: 1360px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 36px 28px 64px;
+      flex: 1;
+    }
+    h1, h2, h3, h4 {
+      color: var(--fg);
+      line-height: 1.28;
+      margin-top: 1.75em;
+      margin-bottom: 0.6em;
+      letter-spacing: -0.015em;
+      scroll-margin-top: 18px;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-top: 0.15em;
+      padding-bottom: 0.4em;
+      border-bottom: 1px solid var(--border);
+    }
+    h2 {
+      font-size: 1.45rem;
+      padding-bottom: 0.3em;
+      border-bottom: 1px solid var(--border);
+    }
+    h3 { font-size: 1.18rem; }
+    h4 { font-size: 1.03rem; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: var(--accent-hover); text-decoration: underline; }
+    blockquote {
+      margin: 1.1em 0;
+      padding: 0.65em 1.1em;
+      color: var(--muted);
+      border-left: 4px solid var(--border-strong);
+      background: var(--surface);
+      border-radius: 0 6px 6px 0;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 0.86em;
+      background: #f1f5f9;
+      color: #0f172a;
+      padding: 0.18em 0.4em;
+      border-radius: 4px;
+    }
+    pre {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      overflow-x: auto;
+      line-height: 1.48;
+    }
+    pre code {
+      background: transparent;
+      padding: 0;
+      font-size: 13px;
+    }
+    pre.mermaid {
+      background: #ffffff;
+      text-align: center;
+      padding: 20px;
+    }
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      margin: 1.2em 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+      line-height: 1.52;
+    }
+    th, td {
+      padding: 10px 13px;
+      border-bottom: 1px solid var(--border);
+      border-right: 1px solid var(--border);
+      vertical-align: top;
+      text-align: left;
+    }
+    th:last-child, td:last-child { border-right: none; }
+    tr:last-child td { border-bottom: none; }
+    th {
+      background: #f1f5f9;
+      font-weight: 600;
+      color: var(--fg);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    tbody tr:nth-child(even) { background: var(--table-stripe); }
+    hr {
+      border: 0;
+      border-top: 1px solid var(--border);
+      margin: 2.2em 0;
+    }
+    .site-footer {
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.55;
+      padding: 20px 28px;
+    }
+    .site-footer-inner {
+      max-width: 1360px;
+      margin: 0 auto;
+    }
+    @media print {
+      .topbar { display: none; }
+      main.container { max-width: none; padding: 0; }
+      .table-wrap { overflow: visible; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="{{ '/' | relative_url }}">{{ site.title | escape }}</a>
+      {% if page.url != "/" and page.url != "/index.html" %}
+      <a class="back-link" href="{{ '/' | relative_url }}">&larr; All Guides &amp; Reference Architectures</a>
+      {% endif %}
+    </div>
+  </header>
+  <main class="container">
+    {{ content }}
+  </main>
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      Independent technical engineering guides and open-source reference architectures. Not affiliated with, sponsored by, or endorsed by Google LLC. Apigee, Gemini, Vertex AI, and Google Cloud are trademarks of Google LLC.
+    </div>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js" crossorigin="anonymous"></script>
+  <script>
+    (function () {
+      var main = document.querySelector("main.container");
+      if (!main) return;
+
+      var tables = main.querySelectorAll("table");
+      for (var i = 0; i < tables.length; i++) {
+        var tbl = tables[i];
+        if (tbl.parentElement && !tbl.parentElement.classList.contains("table-wrap")) {
+          var wrap = document.createElement("div");
+          wrap.className = "table-wrap";
+          tbl.parentElement.insertBefore(wrap, tbl);
+          wrap.appendChild(tbl);
+        }
+      }
+
+      var usedIds = Object.create(null);
+      var headings = main.querySelectorAll("h1, h2, h3, h4");
+      for (var j = 0; j < headings.length; j++) {
+        var h = headings[j];
+        if (h.id) usedIds[h.id] = true;
+        var slug = (h.textContent || "")
+          .toLowerCase()
+          .replace(/[^\w\s-]/g, "")
+          .trim()
+          .replace(/\s+/g, "-");
+        if (slug && !usedIds[slug] && !document.getElementById(slug)) {
+          usedIds[slug] = true;
+          var anchor = document.createElement("span");
+          anchor.id = slug;
+          h.insertBefore(anchor, h.firstChild);
+        }
+      }
+
+      var codes = main.querySelectorAll("div.language-mermaid pre code, pre > code.language-mermaid");
+      var upgraded = false;
+      for (var k = 0; k < codes.length; k++) {
+        var code = codes[k];
+        var container = code.closest("div.language-mermaid") || code.parentElement;
+        if (!container) continue;
+        var pre = document.createElement("pre");
+        pre.className = "mermaid";
+        pre.textContent = code.textContent || "";
+        container.replaceWith(pre);
+        upgraded = true;
+      }
+
+      if (upgraded && window.mermaid) {
+        window.mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "default" });
+        window.mermaid.run({ querySelector: "pre.mermaid" });
+      }
+    })();
+  </script>
+</body>
+</html>
