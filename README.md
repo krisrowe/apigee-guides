@@ -6,16 +6,15 @@ Independent technical deep dives, architectural comparisons, and runnable open-s
 
 ## Featured AI & Agentic Gateway Architecture
 
-### Gemini Enterprise Agent Gateway vs. Apigee as an AI & MCP Gateway
+### Apigee as an Enterprise AI, LLM, MCP & Agentic Gateway
 
-**[Read the full architectural analysis ->](ai-gateway-vs-agent-gateway.md)**
+**[Read the Apigee AI Gateway Guide ->](ai-gateway/)** · **[Compare & Combine with Agent Gateway (`R1`–`R13`) ->](ai-gateway/agent-gateway-comparison.md)**
 
-An evidence-backed architectural comparison between **Gemini Enterprise Agent Platform: Agent Gateway** and **Apigee (`Apigee X` and `Apigee Hybrid`)** across AI-related workloads, validated against official documentation and release notes:
+An evidence-backed architectural guide to **Apigee (`Apigee X` and `Apigee Hybrid`) as an Enterprise AI Gateway**, paired with a complete comparison and integration guide for **Gemini Enterprise Agent Platform: Agent Gateway**, validated against official documentation and release notes:
 
-- **Agent-Side Perimeter vs. Producer-Side & Multi-LLM Mediation:** How `SPIFFE` workload identity, IAM Unified Access Policies (`egressViaIAP`), Auth Manager 3LO encryption, and Semantic Governance pair with Apigee API Products, `<ParsePayload>`, and Managed MCP Discovery Proxies
-- **Enterprise Multi-LLM & Multimodal Gateway Patterns:** Provisioned Throughput (`PT`) to PayGo spillover, multi-provider routing and schema normalization, `<SemanticCacheLookup>`, `<LLMTokenQuota>`, Cloud DLP tokenization, and continuous SSE Model Armor scanning
-- **Inbound, Outbound & Cross-Cloud MCP / A2A Topologies:** REST-to-MCP conversion, third-party SaaS MCP egress mediation (`RFC 8693` / `RFC 9728`), Search-then-Invoke semantic tool discovery, and the three documented dual-gateway integration topologies (`Private PSC Bridge`, `North-South Fronting`, and inline `Apigee Extension Processor`)
-- **Requirements Quick Selector (`R1` to `R13`):** Side-by-side decision matrix mapping enterprise requirements to each gateway (and when to combine both)
+- **[Apigee AI, LLM, MCP & A2A Gateway (`ai-gateway/`)](ai-gateway/):** Multi-LLM routing & Provisioned Throughput (`PT`) to PayGo spillover (`LiteLLM` replacement), `<SemanticCacheLookup>`, `<LLMTokenQuota>`, Cloud DLP `FPE`, continuous SSE Model Armor, Managed MCP Discovery Proxy (`1.17.0+`), `<ParsePayload>` `tools/list` filtering & per-tool `<Quota>`, outbound 3P SaaS MCP egress (`RFC 8693` / `RFC 9728` / KVM), Search-then-Invoke discovery, `A2A` mediation, and Hybrid `1.17.0+` hardening
+- **[Compare & Combine: Agent Gateway vs. Apigee (`agent-gateway-comparison`)](ai-gateway/agent-gateway-comparison.md):** Visual end-to-end architecture, domain matrices, `R1`–`R13` requirements selector, concrete wire scenarios (`A`–`F`), three official dual-gateway topologies (`Private PSC Bridge`, `North-South Fronting`, inline `Apigee Extension Processor`), `15` ISV security partners, FinOps attribution, and production readiness checklist
+- **[Agent Gateway Architecture Deep Dive (`agent-gateway-architecture`)](ai-gateway/agent-gateway-architecture.md):** Seven GCP subsystems, `4` deployment models (`1 GA`, `3 Early Preview`), Private CA `TrustConfig`, `SPIFFE` (`mTLS` / `DPoP`) & Auth Manager 3LO encryption, IAM Unified Access Policies (`egressViaIAP`), Semantic Governance intent gate, Model Armor payload limits, and scope quotas
 
 ---
 
