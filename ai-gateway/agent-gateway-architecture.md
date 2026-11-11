@@ -18,7 +18,7 @@ Infrastructure and identity specification for **Gemini Enterprise Agent Platform
   * [Deployment Models: 1 GA vs. 3 Early Preview](#deployment-models-1-ga-vs-3-early-preview)
   * [Private CAs & Self-Signed Certificates via `TrustConfig`](#private-cas--self-signed-certificates-via-trustconfig)
 * [3. Cryptographic Agent Identity (`SPIFFE`, `mTLS`, `DPoP`) & Auth Manager](#3-cryptographic-agent-identity-spiffe-mtls-dpop--auth-manager)
-* [4. IAM Unified Access Policies (`egressViaIAP`)](#4-iam-unified-access-policies-egressviaiap)
+* [4. IAM Unified Access Policies](#4-iam-unified-access-policies)
 * [5. Service Extensions, Model Armor & Semantic Governance](#5-service-extensions-model-armor--semantic-governance)
 * [6. Scope Boundaries & Operational Limits](#6-scope-boundaries--operational-limits)
 * [7. Official Agent Gateway Documentation References](#7-official-agent-gateway-documentation-references)
@@ -114,9 +114,9 @@ Traditionally on Google Cloud, multiple workloads share a coarse Service Account
 
 ---
 
-## 4. IAM Unified Access Policies (`egressViaIAP`)
+## 4. IAM Unified Access Policies
 
-Agent Gateway integrates with **IAM v3 Unified Access Policies** (Identity-Aware Proxy V2) for deterministic outbound authorization ([IAM Unified Access Policies overview](https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/policies/iam-overview-uap), [Create IAM Unified Access Policies](https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/policies/configure-iam-policies-uap)):
+Agent Gateway's outbound allow/deny engine builds on **IAM v3 Unified Access Policies** backed by Google Cloud's **Identity-Aware Proxy (`iap.googleapis.com`) v2** policy engine—which is why its outbound permission carries the `egressViaIAP` name ([IAM Unified Access Policies overview](https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/policies/iam-overview-uap), [Create IAM Unified Access Policies](https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/policies/configure-iam-policies-uap)):
 
 * Evaluates permission `iap.googleapis.com/resources.egressViaIAP` via predefined role **`roles/iap.egressor`**, requiring `metadata.iapPolicyVersion: "V2"` on the `iap.googleapis.com` `authzExtension` ([`delegate-authorization#combine-iap-ma`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/gateways/delegate-authorization#combine-iap-ma)).
 * Supports `"Effect": "ALLOW"` and `"Effect": "DENY"` inside the same policy alongside **`iamEnforcementMode: "DRY_RUN"`** so teams can audit real outbound agent dependencies in Cloud Audit Logs before switching to `ENFORCE`.

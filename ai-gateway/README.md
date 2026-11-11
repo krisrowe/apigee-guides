@@ -12,8 +12,8 @@ Engineering guide to **Apigee X** and **Apigee Hybrid (1.17.0+)** as a centraliz
 <summary>Recent Platform Updates Covered in This Guide (Late October – November 2026)</summary>
 <div markdown="1">
 
-* **Continuous SSE Model Armor:** `<SanitizeModelResponse>` supports streaming SSE inspection (`<ContinuousScan>true</ContinuousScan>`) on both Apigee X and Apigee Hybrid (GCP clusters; Hybrid `v1.17.3`, October 29, 2026).
-* **Basepath independence & cache-excluded token quotas:** Proxies declaring MCP operation mode are recognized on any basepath rather than `/mcp` alone, and responses served by `<SemanticCacheLookup>` are excluded from `<LLMTokenQuota>` deduction (Apigee `1-18-0-apigee-8`, November 3, 2026).
+* **Continuous SSE Model Armor:** [Streaming SSE model response scanning](https://docs.cloud.google.com/apigee/docs/api-platform/reference/policies/sanitize-llm-response-policy#streaming-sse) is supported on both Apigee X and Apigee Hybrid (GCP clusters; Hybrid `v1.17.3`, October 29, 2026).
+* **Basepath independence & cache-excluded token quotas:** Proxies declaring MCP operation mode are recognized on any basepath rather than `/mcp` alone, and responses served from [semantic cache](https://docs.cloud.google.com/apigee/docs/api-platform/reference/policies/semantic-cache-lookup-policy) are excluded from [LLM token quota](https://docs.cloud.google.com/apigee/docs/api-platform/reference/policies/llm-token-quota-policy) deduction automatically (Apigee `1-18-0-apigee-8`, November 3, 2026).
 * **Stateless MCP & Agent Registry auto-sync:** Apigee X serves Stateless (`2026-07-28`) and Stateful MCP concurrently, while Apigee API Hub synchronizes MCP tools and servers to Agent Registry by default in Preview.
 
 </div>
@@ -259,7 +259,7 @@ For regulated financial, healthcare, public-sector, and telecom workloads, execu
 Three operational controls are mandatory when enabling MCP on Apigee Hybrid ([`enable-mcp`](https://docs.cloud.google.com/apigee/docs/api-platform/apigee-mcp/enable-mcp)):
 
 1. **Grant `watcher_identities` control-plane access before upgrade:** Setting `enableMcpServer: true` in `overrides.yaml` requires a one-time `PATCH` to `organizations/{org}/controlPlaneAccess?update_mask=watcher_identities` adding `serviceAccount:${WATCHER_SA}` (separate from `synchronizer_identities`; omitting it produces `404 Not Found` sync failures and unready MCP pods) and triggers a staged canary rollout of Message Processors during maintenance windows.
-2. **Design within Hybrid MCP capacity limits (`~10,000` tools typical vs. `1,000` in Apigee X):** Maximum `3 MiB` per uploaded OpenAPI spec, `50 MiB` compiled MCP bundle per environment, `10 MiB` default (`30 MiB` maximum) `tools/list` response payload, and `100` hostnames per environment group.
+2. **Size-based Managed MCP tool capacity (~`10,000` tools typical vs. Apigee X's `1,000`-tool org cap):** Unlike Apigee X (which enforces a fixed limit of `1,000` Managed MCP tools per org), Apigee Hybrid removes the fixed tool-count cap and instead bounds OpenAPI-to-MCP capacity by size (`3 MiB` per uploaded OpenAPI spec, `50 MiB` decompressed bundle per MCP Discovery Proxy, `10 MiB` default / `30 MiB` max `tools/list` response per hostname, and `100` hostnames per environment group)—typically fitting around `10,000` tools per org at default settings.
 3. **Apply the mandatory Kubernetes `NetworkPolicy` ([`enable-mcp#restrict-inbound-access`](https://docs.cloud.google.com/apigee/docs/api-platform/apigee-mcp/enable-mcp#restrict-inbound-access)):** Because the in-cluster `apigee-mcp-server` trusts callers inside the cluster network without re-authenticating requests, apply a `NetworkPolicy` restricting TCP `443` on `app=apigee-mcp-server` exclusively to `app=apigee-runtime` pods in the Apigee namespace (implicitly isolating health port `15021`), and monitor `apigee.googleapis.com/mcp/config_refresh/consecutive_failures >= 3` over 5 minutes.
 
 ---
@@ -271,11 +271,11 @@ While **Apigee** governs **LLM routing, APIs, MCP tools, developer IDEs, and cro
 | Layer | **Apigee X / Apigee Hybrid** | **Agent Gateway (Gemini Enterprise)** |
 | :--- | :--- | :--- |
 | **Core boundary** | Enterprise API, Multi-LLM, MCP, & A2A mediation across all callers and clouds | Agent-side identity and outbound egress perimeter for Vertex AI Agent Runtime & Gemini Enterprise |
-| **Distinctive capabilities** | API Products, `tools/list` filtering, REST-to-MCP, PT spillover, semantic caching, `<LLMTokenQuota>`, Cloud DLP, continuous SSE Model Armor | Per-agent cryptographic workload identity (`SPIFFE`), IAM `egressViaIAP` rules, Auth Manager 3LO decryption, unary Semantic Governance intent gate |
+| **Distinctive capabilities** | API Products, [`tools/list` filtering](#4-per-tool-productization-dynamic-toolslist-filtering--quotas), REST-to-MCP, [Provisioned Throughput spillover](https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/provisioned-throughput), [semantic caching](https://docs.cloud.google.com/apigee/docs/api-platform/reference/policies/semantic-cache-lookup-policy), [LLM token quotas](https://docs.cloud.google.com/apigee/docs/api-platform/reference/policies/llm-token-quota-policy), [Cloud DLP](https://docs.cloud.google.com/sensitive-data-protection/docs/deidentify-sensitive-data), [continuous SSE Model Armor](https://docs.cloud.google.com/apigee/docs/api-platform/reference/policies/sanitize-llm-response-policy#streaming-sse) | Per-agent cryptographic workload identity (`SPIFFE`), [IAM Unified Access Policies](agent-gateway-architecture.md#4-iam-unified-access-policies), Auth Manager 3-legged OAuth decryption, unary Semantic Governance intent gate |
 
 **Continue to the Comparison & Integration Pages:**
 * **[Compare & Combine: Agent Gateway vs. Apigee ->](agent-gateway-comparison.md)** — Visual end-to-end architecture, domain comparison matrices, requirements selector, real-world scenarios, three dual-gateway topologies, 15 ISV security partners, FinOps attribution, and production readiness checklist.
-* **[Agent Gateway Architecture Deep Dive ->](agent-gateway-architecture.md)** — Underlying GCP APIs, deployment models (`1 GA`, `3 Early Preview`), private CA `TrustConfig`, `SPIFFE` / Auth Manager, IAM `egressViaIAP` + CEL, Semantic Governance, Model Armor payload limits, and scope quotas.
+* **[Agent Gateway Architecture Deep Dive ->](agent-gateway-architecture.md)** — Underlying GCP APIs, deployment models (`1 GA`, `3 Early Preview`), private CA `TrustConfig`, `SPIFFE` / Auth Manager, IAM Unified Access Policies + CEL, Semantic Governance, Model Armor payload limits, and scope quotas.
 
 ---
 
