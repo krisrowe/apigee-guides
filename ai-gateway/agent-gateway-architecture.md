@@ -1,8 +1,8 @@
 # Agent Gateway Architecture Deep Dive (`Gemini Enterprise Agent Platform`)
 
 <div class="subnav">
-  <a href="README.md">Apigee AI Gateway</a>
-  <a href="agent-gateway-comparison.md">Compare &amp; Combine: Agent Gateway</a>
+  <a href="/ai-gateway/">Apigee AI Gateway</a>
+  <a href="/ai-gateway/agent-gateway-comparison">Compare &amp; Combine: Agent Gateway</a>
   <span class="current">Agent Gateway Deep Dive</span>
 </div>
 

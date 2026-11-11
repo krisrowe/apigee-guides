@@ -1,9 +1,9 @@
 # Gemini Enterprise Agent Gateway vs. Apigee: Comparison & Dual-Gateway Integration
 
 <div class="subnav">
-  <a href="README.md">Apigee AI Gateway</a>
+  <a href="/ai-gateway/">Apigee AI Gateway</a>
   <span class="current">Compare &amp; Combine: Agent Gateway</span>
-  <a href="agent-gateway-architecture.md">Agent Gateway Deep Dive</a>
+  <a href="/ai-gateway/agent-gateway-architecture">Agent Gateway Deep Dive</a>
 </div>
 
 > **Comparison & Integration Guide (`Last Verified: November 6, 2026`):** Evidence-backed comparison and combined integration architecture for **Gemini Enterprise Agent Platform: Agent Gateway** (`networkservices.googleapis.com` / `iap.googleapis.com`) and **Apigee as an AI, LLM, MCP, and A2A Gateway** (`Apigee X` and `Apigee Hybrid`), validated against live `docs.cloud.google.com` documentation and release notes through November 5, 2026.

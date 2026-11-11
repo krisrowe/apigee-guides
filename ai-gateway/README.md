@@ -2,8 +2,8 @@
 
 <div class="subnav">
   <span class="current">Apigee AI Gateway</span>
-  <a href="agent-gateway-comparison.md">Compare &amp; Combine: Agent Gateway</a>
-  <a href="agent-gateway-architecture.md">Agent Gateway Deep Dive</a>
+  <a href="/ai-gateway/agent-gateway-comparison">Compare &amp; Combine: Agent Gateway</a>
+  <a href="/ai-gateway/agent-gateway-architecture">Agent Gateway Deep Dive</a>
 </div>
 
 > **Architectural Scope & Verification Provenance (`Last Verified: November 6, 2026`):** Detailed engineering reference covering **Apigee (`Apigee X` and `Apigee Hybrid 1.17.0+`)** as an enterprise **Multi-LLM, Multimodal, MCP, and Agent-to-Agent (`A2A`) Gateway**. Validated against live `docs.cloud.google.com` documentation and official release notes through November 5, 2026.
