@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
-  <title>{{ page.title | default: site.title | escape }}</title>
+  <title>{{ page.title | default: site.title | replace: '&amp;', '&' | escape }}</title>
   <style>
     :root {
       --bg: #ffffff;
