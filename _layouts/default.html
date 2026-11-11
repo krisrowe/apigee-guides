@@ -173,8 +173,118 @@
       max-width: 1360px;
       margin: 0 auto;
     }
+    .toc-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--accent);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 1.4em 0 1.8em;
+    }
+    .toc-box > p:first-child, .toc-box strong:first-child {
+      margin-top: 0;
+    }
+    .toc-box ul {
+      margin: 0.4em 0 0.2em;
+      padding-left: 1.3em;
+    }
+    .toc-box li { margin: 0.25em 0; }
+    .subnav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin: 1em 0 1.5em;
+      font-size: 13.5px;
+    }
+    .subnav a, .subnav span.current {
+      padding: 4px 10px;
+      border-radius: 6px;
+      text-decoration: none;
+    }
+    .subnav a {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      color: var(--fg);
+      font-weight: 500;
+    }
+    .subnav a:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .subnav span.current {
+      background: var(--accent);
+      color: #ffffff;
+      font-weight: 600;
+    }
+    details {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin: 1em 0 1.3em;
+      padding: 0;
+    }
+    details[open] {
+      border-color: var(--border-strong);
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+    details > summary {
+      cursor: pointer;
+      list-style: none;
+      padding: 11px 16px;
+      background: var(--surface);
+      font-weight: 600;
+      color: var(--fg);
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      user-select: none;
+    }
+    details[open] > summary {
+      border-bottom: 1px solid var(--border);
+      border-radius: 7px 7px 0 0;
+    }
+    details > summary::-webkit-details-marker { display: none; }
+    details > summary::before {
+      content: "▸";
+      font-size: 0.9em;
+      color: var(--accent);
+      transition: transform 0.15s ease;
+      display: inline-block;
+    }
+    details[open] > summary::before {
+      transform: rotate(90deg);
+    }
+    details > *:not(summary) {
+      margin-left: 16px;
+      margin-right: 16px;
+    }
+    details > p:nth-child(2),
+    details > h3:nth-child(2),
+    details > h4:nth-child(2),
+    details > ul:nth-child(2),
+    details > div:nth-child(2),
+    details > pre:nth-child(2) {
+      margin-top: 14px;
+    }
+    details > *:last-child {
+      margin-bottom: 16px;
+    }
+    details > .table-wrap,
+    details > pre,
+    details > div.highlighter-rouge {
+      margin-left: 16px;
+      margin-right: 16px;
+    }
+    span[id] { scroll-margin-top: 18px; }
     @media print {
-      .topbar { display: none; }
+      .topbar, .subnav { display: none; }
       main.container { max-width: none; padding: 0; }
       .table-wrap { overflow: visible; }
     }
@@ -219,36 +329,105 @@
       for (var j = 0; j < headings.length; j++) {
         var h = headings[j];
         if (h.id) usedIds[h.id] = true;
-        var slug = (h.textContent || "")
+        var text = h.textContent || "";
+        var gfmSlug = text
           .toLowerCase()
           .replace(/[^\w\s-]/g, "")
-          .trim()
-          .replace(/\s+/g, "-");
-        if (slug && !usedIds[slug] && !document.getElementById(slug)) {
-          usedIds[slug] = true;
-          var anchor = document.createElement("span");
-          anchor.id = slug;
-          h.insertBefore(anchor, h.firstChild);
+          .replace(/^\s+|\s+$/g, "")
+          .replace(/\s/g, "-");
+        var compactSlug = gfmSlug.replace(/-+/g, "-");
+        var candidates = gfmSlug === compactSlug ? [gfmSlug] : [gfmSlug, compactSlug];
+        for (var c = 0; c < candidates.length; c++) {
+          var slug = candidates[c];
+          if (slug && !usedIds[slug] && !document.getElementById(slug)) {
+            usedIds[slug] = true;
+            var anchor = document.createElement("span");
+            anchor.id = slug;
+            h.insertBefore(anchor, h.firstChild);
+          }
         }
       }
 
-      var codes = main.querySelectorAll("div.language-mermaid pre code, pre > code.language-mermaid");
-      var upgraded = false;
-      for (var k = 0; k < codes.length; k++) {
-        var code = codes[k];
-        var container = code.closest("div.language-mermaid") || code.parentElement;
-        if (!container) continue;
-        var pre = document.createElement("pre");
-        pre.className = "mermaid";
-        pre.textContent = code.textContent || "";
-        container.replaceWith(pre);
-        upgraded = true;
+      function renderMermaidBlocks() {
+        var codes = main.querySelectorAll("div.language-mermaid pre code, pre > code.language-mermaid");
+        var upgraded = false;
+        for (var k = 0; k < codes.length; k++) {
+          var code = codes[k];
+          var container = code.closest("div.language-mermaid") || code.parentElement;
+          if (!container) continue;
+          var pre = document.createElement("pre");
+          pre.className = "mermaid";
+          pre.textContent = code.textContent || "";
+          container.replaceWith(pre);
+          upgraded = true;
+        }
+        if (window.mermaid) {
+          if (upgraded) {
+            window.mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "default" });
+          }
+          var pending = main.querySelectorAll("pre.mermaid:not([data-processed])");
+          var visiblePending = [];
+          for (var p = 0; p < pending.length; p++) {
+            var closedParent = pending[p].closest("details:not([open])");
+            if (!closedParent) visiblePending.push(pending[p]);
+          }
+          if (visiblePending.length) {
+            window.mermaid.run({ nodes: visiblePending });
+          }
+        }
       }
 
-      if (upgraded && window.mermaid) {
-        window.mermaid.initialize({ startOnLoad: false, securityLevel: "strict", theme: "default" });
-        window.mermaid.run({ querySelector: "pre.mermaid" });
+      renderMermaidBlocks();
+
+      var allDetails = main.querySelectorAll("details");
+      for (var d = 0; d < allDetails.length; d++) {
+        allDetails[d].addEventListener("toggle", function () {
+          if (this.open) renderMermaidBlocks();
+        });
       }
+
+      function openDetailsForTarget(target) {
+        if (!target) return false;
+        var changed = false;
+        var el = target;
+        while (el && el !== main) {
+          if (el.tagName === "DETAILS" && !el.open) {
+            el.open = true;
+            changed = true;
+          }
+          el = el.parentElement;
+        }
+        if (changed) renderMermaidBlocks();
+        return changed;
+      }
+
+      function revealHash(hash, shouldScroll) {
+        if (!hash || hash.length < 2) return;
+        var id = decodeURIComponent(hash.slice(1));
+        var target = document.getElementById(id);
+        if (!target) return;
+        var opened = openDetailsForTarget(target);
+        if (shouldScroll || opened) {
+          setTimeout(function () {
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+          }, 20);
+        }
+      }
+
+      if (window.location.hash) {
+        revealHash(window.location.hash, true);
+      }
+      window.addEventListener("hashchange", function () {
+        revealHash(window.location.hash, false);
+      });
+      main.addEventListener("click", function (evt) {
+        var link = evt.target.closest("a[href^='#']");
+        if (!link) return;
+        var href = link.getAttribute("href");
+        if (href && href.length > 1) {
+          revealHash(href, false);
+        }
+      });
     })();
   </script>
 </body>
