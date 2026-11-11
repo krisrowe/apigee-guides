@@ -8,13 +8,13 @@ Independent technical deep dives, architectural comparisons, and runnable open-s
 
 ### Apigee as an Enterprise AI, LLM, MCP & Agentic Gateway
 
-**[Read the Apigee AI Gateway Guide ->](ai-gateway/)** · **[Compare & Combine with Agent Gateway (`R1`–`R13`) ->](ai-gateway/agent-gateway-comparison.md)**
+**[Read the Apigee AI Gateway Guide ->](ai-gateway/)** · **[Compare & Combine with Agent Gateway ->](ai-gateway/agent-gateway-comparison.md)**
 
-An evidence-backed architectural guide to **Apigee (`Apigee X` and `Apigee Hybrid`) as an Enterprise AI Gateway**, paired with a complete comparison and integration guide for **Gemini Enterprise Agent Platform: Agent Gateway**, validated against official documentation and release notes:
+An architectural and implementation guide to **Apigee X** and **Apigee Hybrid** as an Enterprise AI Gateway, paired with a side-by-side comparison and integration blueprint for **Gemini Enterprise Agent Gateway**:
 
-- **[Apigee AI, LLM, MCP & A2A Gateway (`ai-gateway/`)](ai-gateway/):** Multi-LLM routing & Provisioned Throughput (`PT`) to PayGo spillover (`LiteLLM` replacement), `<SemanticCacheLookup>`, `<LLMTokenQuota>`, Cloud DLP `FPE`, continuous SSE Model Armor, Managed MCP Discovery Proxy (`1.17.0+`), `<ParsePayload>` `tools/list` filtering & per-tool `<Quota>`, outbound 3P SaaS MCP egress (`RFC 8693` / `RFC 9728` / KVM), Search-then-Invoke discovery, `A2A` mediation, and Hybrid `1.17.0+` hardening
-- **[Compare & Combine: Agent Gateway vs. Apigee (`agent-gateway-comparison`)](ai-gateway/agent-gateway-comparison.md):** Visual end-to-end architecture, domain matrices, `R1`–`R13` requirements selector, concrete wire scenarios (`A`–`F`), three official dual-gateway topologies (`Private PSC Bridge`, `North-South Fronting`, inline `Apigee Extension Processor`), `15` ISV security partners, FinOps attribution, and production readiness checklist
-- **[Agent Gateway Architecture Deep Dive (`agent-gateway-architecture`)](ai-gateway/agent-gateway-architecture.md):** Seven GCP subsystems, `4` deployment models (`1 GA`, `3 Early Preview`), Private CA `TrustConfig`, `SPIFFE` (`mTLS` / `DPoP`) & Auth Manager 3LO encryption, IAM Unified Access Policies (`egressViaIAP`), Semantic Governance intent gate, Model Armor payload limits, and scope quotas
+- **[Apigee AI, LLM, MCP & A2A Gateway](ai-gateway/):** Multi-provider LLM routing with Provisioned Throughput spillover, semantic response caching, real-time token quotas, streaming Model Armor and Cloud DLP guardrails, REST-to-MCP conversion, per-tool API Product filtering, outbound SaaS MCP token mediation, semantic tool discovery, A2A mediation, and Apigee Hybrid deployment hardening
+- **[Compare & Combine: Agent Gateway vs. Apigee](ai-gateway/agent-gateway-comparison.md):** End-to-end architecture, domain comparison matrices, decision framework, real-world integration scenarios, three dual-gateway topologies (Private PSC Bridge, North-South Fronting, and inline Apigee Extension Processor), security partner integrations, FinOps attribution, and production readiness checklist
+- **[Agent Gateway Architecture Deep Dive](ai-gateway/agent-gateway-architecture.md):** Underlying GCP control-plane APIs, deployment models (Google-managed vs. Early Preview self-managed), private CA `TrustConfig` setup, per-agent cryptographic identity (`SPIFFE`, mTLS, DPoP) and Auth Manager, IAM Unified Access Policies, Semantic Governance, Model Armor bounds, and scale limits
 
 ---
 
