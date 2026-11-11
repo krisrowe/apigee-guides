@@ -34,8 +34,9 @@ According to the [Agent Gateway overview](https://docs.cloud.google.com/gemini-e
 > *"Agent Gateway is a managed proxy service that provides a centralized enforcement point to help secure, govern, and monitor all network traffic for your AI agents. It mediates connections to and from agents deployed in Agent Runtime and Gemini Enterprise, helping to ensure that interactions with users, other agents, and external tools adhere to your organization's security standards."*
 > ([Agent Gateway overview](https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/gateways/agent-gateway-overview))
 
-<details markdown="1">
+<details>
 <summary>⚙️ Seven Collaborating Google Cloud Subsystems (Click to expand)</summary>
+<div markdown="1">
 
 1. **Compute Engine Network Attachment (`compute.networkAttachments`):** Placed in a dedicated subnet (`connection-preference=ACCEPT_AUTOMATIC`, minimum `/28` CIDR) in the same region as your agent. It bridges the Google-managed agent runtime VPC to your consumer VPC and the Agent Gateway data plane.
 2. **Agent Connectivity Template (`networkservices.agentConnectivityTemplates`):** Encapsulates VPC egress mode (`PRIVATE_RANGES_ONLY` default vs. `ALL_TRAFFIC` for VPC-SC or Cloud NAT static egress), Cloud DNS peering domains (`dnsPeeringConfig`, without chained DNS peering), and custom private CA trust anchors (`tlsConfig.trustConfig` referencing Certificate Manager `TrustConfig`).
@@ -45,6 +46,7 @@ According to the [Agent Gateway overview](https://docs.cloud.google.com/gemini-e
 6. **IAM Unified Access Policies (`iam.googleapis.com` v3 + `iap.googleapis.com`):** Evaluates identity-and-destination CEL policies (`iap.googleapis.com/resources.egressViaIAP`, role `roles/iap.egressor`, with mandatory `iapPolicyVersion: "V2"` on the `iap.googleapis.com` extension) on every outbound call.
 7. **Network Security Authorization Policies & Service Extensions (`networksecurity.authzPolicies` + `networkservices.authzExtensions`):** Hooks into the Envoy data plane (`ext_proc` in `FULL_DUPLEX_STREAMED` mode) for `REQUEST_AUTHZ` and `CONTENT_AUTHZ` (delegating to **Model Armor**, the **Semantic Governance Policy Engine**, **Apigee Extension Processor**, or **15 named ISV security partners**).
 
+</div>
 </details>
 
 ---
@@ -85,12 +87,14 @@ Earlier Agent Gateway releases required publicly trusted CAs for all destination
 2. **Manual PEM Rotation Only:** Automated PEM rotation via Google Cloud Secret Manager is unsupported on `TrustConfig`; certificates must be rotated manually.
 3. **Immutability Requires Template Replacement:** `trustConfig` and `networkAttachment` are **immutable** once attached. Updating `tlsConfig`, `dnsPeeringConfig`, or `vpcEgress` requires creating a **new** `AgentConnectivityTemplate` and updating the gateway reference ([`#updating-egress-settings`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/gateways/set-up-vpc-connectivity#updating-egress-settings)).
 
-<details markdown="1">
-<summary>📜 Official `TrustConfig` TLS Behavior Quote (Click to expand)</summary>
+<details>
+<summary>📜 Official <code>TrustConfig</code> TLS Behavior Quote (Click to expand)</summary>
+<div markdown="1">
 
 > *"Private CAs and self-signed certificates: If your target destination (agents, tools, or MCP servers in your VPC network) uses a private CA or internal PKI, you can configure custom trust anchors using the tlsConfig setting in your connectivity template. By referencing a Certificate Manager TrustConfig resource, you can configure Agent Gateway to trust only specific private CAs, or combine private root CAs with publicly trusted CAs (PUBLICLY_TRUSTED_ROOTS)... If your agents connect to Google Cloud APIs (*.googleapis.com) or other public HTTPS endpoints, you must set additionalRoots to PUBLICLY_TRUSTED_ROOTS; without this setting, Agent Gateway doesn't trust Google-signed certificates for googleapis.com."*
 > ([Set up Agent Gateway with VPC connectivity](https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/gateways/set-up-vpc-connectivity#tls-certificate-requirements))
 
+</div>
 </details>
 
 ---
@@ -126,8 +130,9 @@ Documented in [IAM Unified Access Policies overview](https://docs.cloud.google.c
 * **Allow + Deny + Dry-Run in One Policy:** Supports `"Effect": "ALLOW"` and `"Effect": "DENY"` inside the same policy plus **`iamEnforcementMode: "DRY_RUN"`** alongside `ENFORCE` for zero-downtime discovery in Cloud Audit Logs.
 * **Org Policy Prerequisite:** For organizations created after March 4, 2026, disable `constraints/iam.managed.disableAccessPolicyBindings` before binding Unified Access Policies.
 
-<details markdown="1">
+<details>
 <summary>🔍 CEL Attribute Reference (Registered Agent Registry vs. Unregistered Endpoints)</summary>
+<div markdown="1">
 
 * **Registered Resources (in `Agent Registry`):** Write CEL conditions against canonical metadata without hardcoding IPs or URLs:
   * `destination.agent_registry.resource_type` (`'AGENT'`, `'ENDPOINT'`, `'MCP_SERVER'`, `'SKILL'`)
@@ -144,10 +149,12 @@ Documented in [IAM Unified Access Policies overview](https://docs.cloud.google.c
   * `destination.unregistered.path` (e.g., `'/v1/QueryData'`)
   * `destination.unregistered.method` (e.g., `'GET'`, `'POST'`)
 
+</div>
 </details>
 
-<details markdown="1">
+<details>
 <summary>📄 Verified Example: IAM Unified Access Policy Blocking Destructive MCP Tools (JSON)</summary>
+<div markdown="1">
 
 ```json
 {
@@ -182,6 +189,7 @@ Documented in [IAM Unified Access Policies overview](https://docs.cloud.google.c
 }
 ```
 
+</div>
 </details>
 
 ---

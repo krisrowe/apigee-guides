@@ -54,6 +54,31 @@
       letter-spacing: -0.01em;
     }
     .topbar .brand:hover { color: #93c5fd; }
+    .topbar .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .topbar .avatar-link {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 9999px;
+      line-height: 0;
+      opacity: 0.92;
+      transition: opacity 0.15s ease, transform 0.15s ease;
+    }
+    .topbar .avatar-link:hover {
+      opacity: 1;
+      transform: scale(1.06);
+    }
+    .topbar .avatar-img {
+      width: 26px;
+      height: 26px;
+      border-radius: 9999px;
+      border: 1.5px solid rgba(147, 197, 253, 0.55);
+      object-fit: cover;
+      display: block;
+    }
     .topbar .back-link {
       color: #93c5fd;
       text-decoration: none;
@@ -236,14 +261,12 @@
     details > summary {
       cursor: pointer;
       list-style: none;
+      display: block;
       padding: 11px 16px;
       background: var(--surface);
       font-weight: 600;
       color: var(--fg);
       border-radius: 7px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
       user-select: none;
     }
     details[open] > summary {
@@ -255,6 +278,7 @@
       content: "▸";
       font-size: 0.9em;
       color: var(--accent);
+      margin-right: 8px;
       transition: transform 0.15s ease;
       display: inline-block;
     }
@@ -265,6 +289,12 @@
       margin-left: 16px;
       margin-right: 16px;
     }
+    details > div {
+      margin: 0;
+      padding: 14px 18px 16px;
+    }
+    details > div > *:first-child { margin-top: 0; }
+    details > div > *:last-child { margin-bottom: 0; }
     details > p:nth-child(2),
     details > h3:nth-child(2),
     details > h4:nth-child(2),
@@ -294,9 +324,15 @@
   <header class="topbar">
     <div class="topbar-inner">
       <a class="brand" href="{{ '/' | relative_url }}">{{ site.title | escape }}</a>
-      {% if page.url != "/" and page.url != "/index.html" %}
-      <a class="back-link" href="{{ '/' | relative_url }}">&larr; All Guides &amp; Reference Architectures</a>
-      {% endif %}
+      <div class="nav-right">
+        {% if page.url == "/" or page.url == "/index.html" %}
+        <a class="avatar-link" href="https://github.com/krisrowe/apigee-guides" target="_blank" rel="noopener" title="GitHub Repository" aria-label="GitHub Repository">
+          <img class="avatar-img" src="https://avatars.githubusercontent.com/u/6232471?s=80" alt="" width="28" height="28" loading="lazy">
+        </a>
+        {% else %}
+        <a class="back-link" href="{{ '/' | relative_url }}">&larr; All Guides &amp; Reference Architectures</a>
+        {% endif %}
+      </div>
     </div>
   </header>
   <main class="container">

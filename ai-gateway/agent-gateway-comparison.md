@@ -8,8 +8,9 @@
 
 > **Comparison & Integration Guide (`Last Verified: November 6, 2026`):** Evidence-backed comparison and combined integration architecture for **Gemini Enterprise Agent Platform: Agent Gateway** (`networkservices.googleapis.com` / `iap.googleapis.com`) and **Apigee as an AI, LLM, MCP, and A2A Gateway** (`Apigee X` and `Apigee Hybrid`), validated against live `docs.cloud.google.com` documentation and release notes through November 5, 2026.
 
-<details markdown="1">
+<details>
 <summary>🔄 Verification Tags &amp; November 6, 2026 Validation Delta (Click to expand)</summary>
+<div markdown="1">
 
 * **`[VERIFIED]`:** Confirmed directly against live official documentation (`HTTP 200`) or empirical product behavior cited inline.
 * **`[ASSUMPTION / INFERENCE]`:** Architectural synthesis or multi-product pattern deduced from verified component behaviors where no single end-to-end doc page states the combined claim verbatim.
@@ -24,6 +25,7 @@
 6. **Expanded Multi-LLM Routing, 3P SaaS MCP Egress, Semantic Tool Discovery & A2A:** Validated 7 AI traffic direction modes on Apigee including PT-to-PayGo spillover (`LiteLLM` consolidation), `RFC 8693` / KVM SaaS MCP egress, Search-then-Invoke discovery, and cross-cloud/in-cluster `A2A` mediation ([Apigee AI Gateway](README.md)).
 7. **Three Official Dual-Gateway Integration Topologies:** Private Southbound PSC Bridge, North-South External/Multi-Cloud Fronting, and Inline `Apigee Extension Processor` (`CONTENT_AUTHZ`) ([Section 6](#6-three-official-dual-gateway-topologies)).
 
+</div>
 </details>
 
 <div class="toc-box" markdown="1">
@@ -60,8 +62,9 @@ Both **Agent Gateway** and **Apigee (as an AI / MCP Gateway)** inspect **Model C
 * **Apigee (`Apigee X` & `Apigee Hybrid`) — _Full-Spectrum AI, LLM, MCP, & A2A Mediation Gateway_:**
   Sits across model endpoints, REST/MCP backends, outbound 3P SaaS MCP destinations, cross-cloud/east-west A2A links, and inline `CONTENT_AUTHZ` callouts. Answers *"How do we unify Multi-LLM routing/PT spillover (replacing `LiteLLM`), semantic vector caching, `<LLMTokenQuota>`, Cloud DLP `FPE`, continuous SSE Model Armor, REST-to-MCP conversion, dynamic `tools/list` filtering, per-tool `<Quota>`, `RFC 8693` OBO/KVM SaaS egress, and Search-then-Invoke discovery for any client or cloud?"* ([Full Apigee AI Gateway Guide ->](README.md)).
 
-<details markdown="1">
+<details>
 <summary>🏢 Real-World Analogy: Corporate Laptop VPN vs. Enterprise Central Switchboard</summary>
+<div markdown="1">
 
 Think of an AI Agent as a **corporate employee on a company-issued laptop**, and your enterprise backends, SaaS tools, and foundation models as **bank vaults, partner exchanges, and shared AI compute utilities**:
 
@@ -75,6 +78,7 @@ Think of an AI Agent as a **corporate employee on a company-issued laptop**, and
   * Balances **LLM calls** across Vertex AI Provisioned Throughput, PayGo, Azure OpenAI, and Anthropic with automatic `429` failover, schema normalization, `<LLMTokenQuota>` FinOps caps, Cloud DLP tokenization, SSE Model Armor scanning, and `<SemanticCacheLookup>` vector caching.
   * For **MCP and A2A calls**, converts REST to MCP, brokers `RFC 8693` or KVM credentials so raw SaaS keys stay off laptops, serves entitlement-filtered semantic tool discovery, strips unauthorized tools from `tools/list`, and enforces per-tool `<Quota>` limits.
 
+</div>
 </details>
 
 ---
@@ -155,8 +159,9 @@ flowchart LR
 
 ### Detailed Technical Comparison (Expandable by Domain)
 
-<details markdown="1">
+<details>
 <summary>📋 Matrix A: Platform Scope, APIs, Runtimes, Hybrid Execution &amp; Catalog Sync</summary>
+<div markdown="1">
 
 | Dimension | Gemini Enterprise Agent Platform: Agent Gateway | Apigee as an AI / MCP Gateway (`Apigee X` & `Apigee Hybrid`) |
 | :--- | :--- | :--- |
@@ -167,10 +172,12 @@ flowchart LR
 | **Hybrid & Multi-Cloud Execution** | **Google-Managed SaaS Only for GA:** Runs on Google Cloud's managed Envoy data plane in the same region as the agent *(Self-Managed GKE, Cloud Run, and Cross-Cloud Envoy for EKS/AKS/on-prem are in **Early Preview**)*. | **Production GA Anywhere (`Apigee Hybrid 1.17.0+`):** Runs the full API runtime (`apigee-runtime`) and Managed MCP Server (`apigee-mcp-server`) inside customer GKE, AWS EKS, Azure AKS, Red Hat OpenShift, or on-prem clusters. Request traffic never leaves the cluster. |
 | **Catalog, Skills & Discovery Sync** | **Agent Registry (`agentregistry.googleapis.com`):** Discovers `Agent Runtime` agents, Cloud Run MCP servers, and API Hub MCP servers; allows custom endpoint registration (up to 5,000 resources per gateway). Gemini Enterprise apps bind to a single regional registry (`us-central1` for `global`/`us`, `europe-west1` for `eu`). | **Apigee API Hub (`apihub.googleapis.com`) & Developer Portal:** Catalogs REST APIs, OpenAPI specs, MCP servers (`MCP` style), and Ed25519-signed agentic `.skill` bundles (`distribute-agentic-skills`), with `/semanticSearch`. **Automatically syncs MCP tools/servers to Agent Registry by default (Preview)**. |
 
+</div>
 </details>
 
-<details markdown="1">
+<details>
 <summary>🔐 Matrix B: Identity, Credential Vaults, REST-to-MCP Translation &amp; Tool Authorization</summary>
+<div markdown="1">
 
 | Dimension | Gemini Enterprise Agent Platform: Agent Gateway | Apigee as an AI / MCP Gateway (`Apigee X` & `Apigee Hybrid`) |
 | :--- | :--- | :--- |
@@ -181,10 +188,12 @@ flowchart LR
 | **MCP Tool Annotation Awareness** | **Yes:** IAM Unified Access Policies evaluate CEL rules against MCP tool annotations (`read_only_hint`, `destructive_hint`, `idempotent_hint`, `open_world_hint`) registered in Agent Registry. | **Via Custom Policy / OPA:** Inspects arbitrary JSON-RPC payloads, OpenAPI metadata, or headers via JavaScript/Python/Java callouts or OPA `<ExternalCallout>`, though not natively bound to Agent Registry annotations. |
 | **Dynamic `tools/list` Response Filtering** | **No:** Allows or denies `tools/list` or specific `tools/call` methods, but does not rewrite/filter the JSON array inside a `tools/list` response payload per consumer tier. | **Yes (Native):** When `<ParsePayload>` is paired with an API Product in Request and Response flows, Apigee automatically strips unauthorized tools from `tools/list` responses per consumer app. |
 
+</div>
 </details>
 
-<details markdown="1">
+<details>
 <summary>🛡️ Matrix C: Guardrails, Multi-LLM Routing, Semantic Caching, Quotas, TLS &amp; Scale Limits</summary>
+<div markdown="1">
 
 | Dimension | Gemini Enterprise Agent Platform: Agent Gateway | Apigee as an AI / MCP Gateway (`Apigee X` & `Apigee Hybrid`) |
 | :--- | :--- | :--- |
@@ -197,6 +206,7 @@ flowchart LR
 | **TLS Certificate Support for Backends** | **Public CAs by Default + Private CA via `TrustConfig`:** Supports private CAs and allowlisted self-signed certs for VPC targets via `AgentConnectivityTemplate` + Certificate Manager `TrustConfig` (`tlsConfig`), **requiring `additionalRoots: PUBLICLY_TRUSTED_ROOTS`** if calling `*.googleapis.com`, manual PEM rotation, and template replacement on updates *(custom FQDN `authzExtensions` do not validate server certs)*. | **Full Enterprise PKI & Two-Way mTLS Control:** Supports custom private CA truststores, keystores, self-signed backend certs, two-way mTLS `TargetServer` definitions, SNI overrides, and automated rotation without recreating gateway bindings. |
 | **Scale, Quotas & VPC-SC** | • Max **5,000** registered resources per gateway; max **4** `authzPolicies` on egress (requires multi-gateway sharding across business units); max **1** `CONTENT_AUTHZ` policy on ingress; `1,500`-byte MTU.<br>• **VPC-SC supported** for gateways created **after Sept 8, 2026** with `vpcEgress: ALL_TRAFFIC` + private DNS to `restricted.googleapis.com` (`199.36.153.4/30`). | • Up to **1,000** MCP tools per org in Apigee X (SaaS) via Managed MCP Proxy.<br>• Up to **~10,000** MCP tools per org in Apigee Hybrid `1.17.0+` (bounded by `3 MiB` OAS, `50 MiB` bundle, `10 MiB` default / `30 MiB` max `tools/list`, and `100` hostnames/envgroup), with **no 4-policy cap** across API Products or `Apigee Extension Processor`. Full **VPC-SC** support on Apigee X. |
 
+</div>
 </details>
 
 ---
@@ -244,57 +254,68 @@ In a mature Google Cloud architecture, **Agent Gateway and Apigee are complement
 
 Expand any scenario below to trace the exact request/response behavior on the wire:
 
-<details markdown="1">
+<details>
 <summary id="scenario-a-200-legacy-rest-apis-exposed-as-mcp-tools">🔄 Scenario A: 200 Legacy REST APIs Exposed as MCP Tools (Apigee + API Hub)</summary>
+<div markdown="1">
 
 *"We have 200 legacy REST APIs (OpenAPI 3.0) and want our AI agents to use them as MCP tools without writing custom MCP servers."*
 
 * **Can Agent Gateway do this?** **No.** Agent Gateway is a passthrough proxy. If your backend only speaks REST (`GET /v1/accounts/{id}`) and your agent speaks MCP (`POST /mcp` with `method: "tools/call"`), Agent Gateway cannot translate between them.
 * **How Apigee solves it:** Upload the OpenAPI specs to **Apigee API Hub**, click **Configure MCP tools**, and deploy the **Managed Apigee MCP Discovery Proxy** (`<ORG>.mcp.apigee.internal`). Apigee automatically exposes all 200 REST APIs as standard MCP tools (`tools/list`, `tools/call`), syncs their metadata into **Agent Registry** by default, and translates every MCP JSON-RPC call into the corresponding backend REST request.
 
+</div>
 </details>
 
-<details markdown="1">
-<summary id="scenario-b-poisoned-email-prompt-injection-blocking-transfer_funds">🛡️ Scenario B: Poisoned Email Prompt Injection Blocking `transfer_funds` (Agent Gateway)</summary>
+<details>
+<summary id="scenario-b-poisoned-email-prompt-injection-blocking-transfer_funds">🛡️ Scenario B: Poisoned Email Prompt Injection Blocking <code>transfer_funds</code> (Agent Gateway)</summary>
+<div markdown="1">
 
 *"An attacker sends our user an email containing a hidden prompt injection. When the user asks their Gemini Enterprise agent to 'Summarize my unread emails', the poisoned email tricks the agent into calling `transfer_funds(amount=5000)` on an MCP server the agent is normally authorized to use."*
 
 * **Can Apigee alone prevent this?** Apigee's `<SanitizeUserPrompt>` (`<FunctionResponseSource>`) can scan tool outputs for known prompt-injection signatures, and Apigee's `<Quota>` can rate-limit `transfer_funds` to 3 calls/minute. However, if the poisoned email evades signature detection and the agent issues a syntactically valid `tools/call` for `transfer_funds(amount=5000)`, Apigee does **not** see the agent's internal multi-turn chat history or original user prompt (`"Summarize my unread emails"`), so to Apigee it looks like a valid, authenticated tool call.
 * **How Agent Gateway solves it:** Because **Agent Gateway** is attached to the agent's outbound network interface and runs the **Semantic Governance Policy Engine** (`CONTENT_AUTHZ`), it inspects all 5 runtime inputs together (**Current User Prompt** = *"Summarize my unread emails"*, **Chat History**, **Tools Manifest**, **Natural Language Constraints**, and **Suggested Tool Invocation** = `transfer_funds(5000)`). For **non-streaming** model calls across Gemini, Claude, OpenAI, Mistral, Llama, or vLLM, the Semantic Governance LLM intent gate recognizes that `transfer_funds` has zero alignment with *"Summarize my unread emails"* and blocks the outbound `tools/call` before it leaves the agent's perimeter *(remember: disable LLM streaming or pair with deterministic Apigee controls because `:streamGenerateContent` / `"stream": true` is not evaluated by Semantic Governance today)*.
 
+</div>
 </details>
 
-<details markdown="1">
-<summary id="scenario-c-tiered-toolslist-filtering--per-tool-quotas-on-one-mcp-server">🎚️ Scenario C: Tiered `tools/list` Filtering &amp; Per-Tool Quotas (Apigee `&lt;ParsePayload&gt;`)</summary>
+<details>
+<summary id="scenario-c-tiered-toolslist-filtering--per-tool-quotas-on-one-mcp-server">🎚️ Scenario C: Tiered <code>tools/list</code> Filtering &amp; Per-Tool Quotas (Apigee <code>&lt;ParsePayload&gt;</code>)</summary>
+<div markdown="1">
 
 *"We want to expose a single Financial MCP Server to 50 different internal teams and external partners, where Tier-1 apps only see 5 read-only tools at 300 calls/min, and Tier-2 apps see all 25 tools (including write tools) at 10 calls/min."*
 
 * **Can Agent Gateway do this?** **No.** Agent Gateway has no concept of API Products, developer subscriptions, dynamic `tools/list` payload filtering, or per-tool rate limit quotas.
 * **How Apigee solves it:** Place **Apigee** in front of the Financial MCP Server with `<ParsePayload>` (`<Protocol>MCP</Protocol>`), `<VerifyAPIKey>` / `<OAuthV2>`, and `<Quota>`. Create two **API Products** (`Tier-1` and `Tier-2`). When a Tier-1 client calls `tools/list`, Apigee dynamically strips the 20 write tools from the JSON response and enforces the `300 calls/min` quota on the 5 allowed tools.
 
+</div>
 </details>
 
-<details markdown="1">
+<details>
 <summary id="scenario-d-zero-trust-3lo-user-token-injection-without-exposing-secrets">🔑 Scenario D: Zero-Trust 3LO User Token Injection Without Exposing Secrets (Agent Gateway)</summary>
+<div markdown="1">
 
 *"Our Gemini Enterprise agent needs to call an internal MCP server using the human user's 3-legged OAuth (3LO) credentials, and we must ensure the agent's Python code can never log or exfiltrate the user's raw OAuth access token."*
 
 * **How Agent Gateway + Agent Identity Auth Manager solves it:** Configure the OAuth provider in **Agent Identity Auth Manager** and attach **Agent Gateway** (`Agent-to-Anywhere`) to **Gemini Enterprise**. Auth Manager encrypts the end-user's OAuth token when handing it to the runtime, and **Agent Gateway decrypts the token at the outbound proxy edge** right as the request leaves the gateway. The agent's code and LLM context never see the raw user credential.
 
+</div>
 </details>
 
-<details markdown="1">
-<summary id="scenario-e-replacing-custom-litellm-proxies-with-an-enterprise-llm-gateway">🔀 Scenario E: Replacing Custom `LiteLLM` Proxies with an Enterprise LLM Gateway (Apigee)</summary>
+<details>
+<summary id="scenario-e-replacing-custom-litellm-proxies-with-an-enterprise-llm-gateway">🔀 Scenario E: Replacing Custom <code>LiteLLM</code> Proxies with an Enterprise LLM Gateway (Apigee)</summary>
+<div markdown="1">
 
 *"Teams stood up custom `LiteLLM` proxy containers to route across Vertex AI Provisioned Throughput (`PT`), PayGo spillover, Azure OpenAI, and Anthropic, enforce department token caps, and tokenize PII before prompts leave our network. How do we standardize that on a managed enterprise gateway?"*
 
 * **Can Agent Gateway do this?** **No.** Agent Gateway passes outbound model calls through to a single target URL without PT-to-PayGo spillover, cross-vendor schema translation, `<LLMTokenQuota>` enforcement, or inline `FPE` tokenization.
 * **How Apigee solves it:** **Apigee** replaces self-managed `LiteLLM` servers with a single enterprise LLM Gateway: it normalizes incoming OpenAI-compatible payloads, runs **Cloud DLP** `FPE` tokenization and `<SemanticCacheLookup>`, checks `<PromptTokenLimit>` and `<LLMTokenQuota>`, routes primary traffic to dedicated **Vertex AI Provisioned Throughput (`PT`)** via `<GoogleAuthentication>` with automatic `HTTP 429`/`5xx` spillover to **PayGo** or secondary model providers, and scans streamed SSE completions continuously via `<SanitizeModelResponse>` (`<ContinuousScan>true</ContinuousScan>`).
 
+</div>
 </details>
 
-<details markdown="1">
+<details>
 <summary id="scenario-f-developer-ides-3p-saas-mcp-cross-cloud-a2a--300-tools">🌐 Scenario F: Developer IDEs, 3P SaaS MCP, Cross-Cloud A2A &amp; 300+ Tools (Apigee + API Hub)</summary>
+<div markdown="1">
 
 *"Thousands of developers in `VS Code`, `Cursor`, and `Claude Desktop` plus agents in AWS/Azure need governed access to 300+ internal MCP tools, external 3P SaaS MCP servers, and cross-cloud `A2A` agents without leaking SaaS API keys onto laptops or stuffing 300 schemas into every prompt."*
 
@@ -304,6 +325,7 @@ Expand any scenario below to trace the exact request/response behavior on the wi
   2. Outbound calls to 3P SaaS MCP servers swap short-lived corporate JWTs for **Encrypted KVM** credentials or **RFC 8693** OBO tokens (returning `HTTP 200` JSON-RPC `-32000` on mid-session tool blocks so IDEs never enter infinite OAuth loops).
   3. Cross-cloud **A2A** calls (`/.well-known/agent.json`, JSON-RPC/SSE) traverse Apigee with instant API Product kill-switch control.
 
+</div>
 </details>
 
 ---
@@ -347,8 +369,9 @@ Because `Client-to-Agent` Agent Gateway requires callers to authenticate with Go
 Documented in [Connect the Apigee extension processor to an Agent Gateway](https://docs.cloud.google.com/apigee/docs/api-platform/service-extensions/extension-processor-agent-gateway), Agent Gateway can invoke **Apigee synchronously inline as a `CONTENT_AUTHZ` extension** without changing the agent's target URLs.
 * **How it works:** Uses an `AuthzPolicy` (`policyProfile: CONTENT_AUTHZ`, `action: CUSTOM`) + `AuthzExtension` pointing over PSC + private Cloud DNS (`apigee-extproc.<domain>`) to a **no-target proxy** in a dedicated Apigee environment (`apigee-service-extension-enabled=true`). Apigee executes policies on `request.content` and `response.content` and returns an allow/deny verdict (plus header/body mutations) while Agent Gateway forwards approved traffic.
 
-<details markdown="1">
-<summary>📄 Verified `AuthzExtension` YAML &amp; Four Critical Operational Caveats (`[VERIFIED]`)</summary>
+<details>
+<summary>📄 Verified <code>AuthzExtension</code> YAML &amp; Four Critical Operational Caveats (<code>[VERIFIED]</code>)</summary>
+<div markdown="1">
 
 **Verified `AuthzExtension` Configuration ([`extension-processor-agent-gateway#create-authz-ext`](https://docs.cloud.google.com/apigee/docs/api-platform/service-extensions/extension-processor-agent-gateway#create-authz-ext)):**
 ```yaml
@@ -369,6 +392,7 @@ metadata:
 3. **Unsupported Policies in Extension Processor Environments ([`extension-processor-overview#limitations`](https://docs.cloud.google.com/apigee/docs/api-platform/service-extensions/extension-processor-overview#limitations)):** Dedicated Extension Processor environments **do not support** `<ExternalCallout>`, `<ServiceCallout>`, `<IntegrationCallout>`, `<SetIntegrationRequest>`, `<PublishMessage>`, `<MessageLogging>`, or `<GenerateJWT>` (and max `1` environment per envgroup, max `50` proxies). Use **Topology 1 (Reverse Proxy)** if you need OPA `<ExternalCallout>`, RFC 8693 `<ServiceCallout>` token exchange, or REST-to-MCP translation.
 4. **Service Extensions `ext_proc` Body Cap ([`callouts-overview#limitations_with_body_processing`](https://docs.cloud.google.com/service-extensions/docs/callouts-overview#limitations_with_body_processing)):** gRPC `ProcessingResponse` messages from `ext_proc` callouts cannot exceed **`128 kB`** (`RESOURCE_EXHAUSTED`).
 
+</div>
 </details>
 
 ---
@@ -401,8 +425,9 @@ Before promoting a combined **Agent Gateway + Apigee** architecture to productio
    * **Compromised Agent Kill Switch (`Agent Gateway`):** Add an explicit `"Effect": "DENY"` rule for the offending `principal://agents.global...` SPIFFE ID in IAM Unified Access Policy (`egressViaIAP`) to sever all outbound access immediately without disrupting shared infrastructure.
    * **Compromised Consumer App or Backend Tool Kill Switch (`Apigee`):** Revoke the Developer App credential or remove the specific `tools/call/<tool_name>` operation from the **Apigee API Product** to halt invocations across *all* internal, IDE, and external callers simultaneously.
 
-<details markdown="1">
+<details>
 <summary>🛡️ Custom Organization Policy YAML: Restrict Reasoning Engine Egress to Approved Agent Gateways</summary>
+<div markdown="1">
 
 ```yaml
 name: organizations/ORGANIZATION_ID/customConstraints/custom.allowlistedEgressAgentGatewaysForAgentEngine
@@ -422,6 +447,7 @@ display_name: Restrict Reasoning Engine Egress to Approved Agent Gateways
 ```
 *(Pair with the matching `custom.allowlistedIngressAgentGatewaysForAgentEngine` constraint on `clientToAgentConfig.agentGateway` for inbound governance).*
 
+</div>
 </details>
 
 ---

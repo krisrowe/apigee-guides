@@ -8,8 +8,9 @@
 
 > **Architectural Scope & Verification Provenance (`Last Verified: November 6, 2026`):** Detailed engineering reference covering **Apigee (`Apigee X` and `Apigee Hybrid 1.17.0+`)** as an enterprise **Multi-LLM, Multimodal, MCP, and Agent-to-Agent (`A2A`) Gateway**. Validated against live `docs.cloud.google.com` documentation and official release notes through November 5, 2026.
 
-<details markdown="1">
+<details>
 <summary>🔄 Provenance Key &amp; November 2026 Apigee AI / MCP Updates (Click to expand)</summary>
+<div markdown="1">
 
 * **`[VERIFIED]`:** Confirmed directly against live official documentation (`HTTP 200`) or empirical product behavior cited inline.
 * **`[ASSUMPTION / INFERENCE]`:** Architectural synthesis or multi-product pattern deduced from verified component behaviors where no single end-to-end doc page states the combined claim verbatim.
@@ -20,6 +21,7 @@
 * **Basepath Independence & Cache-Excluded Token Quotas (`1-18-0-apigee-8`, Nov 3, 2026):** Proxies declaring `<ProxyOperationMode>MCP</ProxyOperationMode>` are recognized on any basepath (no longer restricted to `/mcp`), and `<SemanticCacheLookup>` cache hits are automatically excluded from `<LLMTokenQuota>` deduction.
 * **Stateless MCP (`2026-07-28`) & Default API Hub -> Agent Registry Sync:** Apigee X serves Stateless (`2026-07-28`) + Stateful MCP concurrently, while API Hub synchronizes MCP tools and servers to Agent Registry by default (Preview).
 
+</div>
 </details>
 
 <div class="toc-box" markdown="1">
@@ -116,8 +118,9 @@ Documented in [`<SanitizeUserPrompt>`](https://docs.cloud.google.com/apigee/docs
   * **(a) Synchronous Inline Format-Preserving Encryption (`FPE`):** Replaces PII/account numbers with deterministic surrogate tokens before prompts leave for external LLMs (and optionally re-identifies authorized responses).
   * **(b) Zero-Latency (`0 ms` client impact) Asynchronous Redaction:** Scrubs prompts/completions in `PostClientFlow` before writing to analytics/SIEM sinks. Pair with IAM CEL conditions restricting `apigee.tracesessions.create` in production so unredacted prompts cannot be captured via ad-hoc debug sessions.
 
-<details markdown="1">
+<details>
 <summary>⚙️ Field Tuning Notes &amp; Apigee Hybrid GCP-Only Model Armor Boundary (Click to expand)</summary>
+<div markdown="1">
 
 * **Field Tuning Tip (`[ASSUMPTION / INFERENCE]`):** Enable `pi_and_jailbreak` detection on **input/tool-output templates** rather than model-output templates to avoid false-positive blocks when an LLM legitimately explains security concepts in its answer, and set SDP confidence thresholds to `LIKELY` or `VERY_LIKELY`.
 * **Critical Apigee Hybrid Platform Boundary & Latency Placement (`[VERIFIED]` + `[ASSUMPTION / INFERENCE]`):**
@@ -125,6 +128,7 @@ Documented in [`<SanitizeUserPrompt>`](https://docs.cloud.google.com/apigee/docs
   > ([Get started with Apigee Model Armor policies: Limitations](https://docs.cloud.google.com/apigee/docs/api-platform/tutorials/using-model-armor-policies#limitations))
   *(For multi-cloud Apigee Hybrid clusters on AWS EKS, Azure AKS, or OpenShift, avoid `150-300 ms` cross-cloud guardrail hairpinning by enforcing fast `< 5 ms` deterministic auth/quota/regex checks at Apigee and co-locating deep LLM guardrail inspection in the same cloud region as the target model or invoking Model Armor's REST API via `<ServiceCallout>`).*
 
+</div>
 </details>
 
 ### 2.5 Multimodal Payloads (`Claim-Check`) & OpenTelemetry Continuity
@@ -151,14 +155,16 @@ Most enterprises have thousands of existing REST APIs documented in OpenAPI 3.0 
 2. **Build-Time Static Proxy Generation (`apigee-go-gen`):**
    * Uses the [`apigee-go-gen` MCP generator](https://apigee.github.io/apigee-go-gen/render/mcp/) (`apigee-go-gen transform oas-to-mcp`) CLI to compile an OpenAPI 3.0 specification into a self-contained Apigee proxy bundle (`apiproxy/`) using `<AssignMessage>` and JavaScript policies (`check-req.js`, `transform-oas-mcp.js`) on any Apigee X or Hybrid version.
 
-<details markdown="1">
-<summary>📡 Stateless (`2026-07-28`) vs. Stateful MCP Matrix &amp; Default API Hub -&gt; Agent Registry Sync</summary>
+<details>
+<summary>📡 Stateless (<code>2026-07-28</code>) vs. Stateful MCP Matrix &amp; Default API Hub -&gt; Agent Registry Sync</summary>
+<div markdown="1">
 
 * **Stateless (`2026-07-28`) vs. Stateful MCP Protocol Matrix ([`apigee-mcp-overview#supported-protocol-versions`](https://docs.cloud.google.com/apigee/docs/api-platform/apigee-mcp/apigee-mcp-overview#supported-protocol-versions)):**
   * **Apigee X (SaaS):** Serves **both** the modern **Stateless MCP protocol (`2026-07-28`: `server/discover`, `tools/list`, `tools/call`)** and **Stateful MCP protocols (`2025-11-25`, `2025-06-18`, `2025-03-26`, `2024-11-05`)** concurrently on the same endpoint. Apigee selects the protocol from `params._meta["io.modelcontextprotocol/protocolVersion"]` in the JSON-RPC body (not the `MCP-Protocol-Version` header alone), requires matching `MCP-Protocol-Version`, `Mcp-Method`, and `Mcp-Name` headers on stateless calls, and forwards OpenTelemetry `traceparent`, `tracestate`, and `baggage` from `params._meta` to backends as HTTP headers.
   * **Apigee Hybrid (`1.17.0+`):** Supports the **stateful MCP protocol versions only** (`2026-07-28` stateless MCP is supported on Apigee X SaaS only).
 * **Default API Hub -> Agent Registry Auto-Sync (Preview, [`manage-agent-registry-integration`](https://docs.cloud.google.com/apigee/docs/apihub/manage-agent-registry-integration)):** API Hub (`API hub > Settings > Actions > Sync to Agent Registry`) **automatically synchronizes MCP tools and server metadata to Agent Registry by default**. *(Caveats: does not sync APIs whose style was manually set to `MCP`, does not sync deployments linked to multiple API versions because Agent Registry is unversioned, and toggling sync `Off` deletes all previously synced API Hub records from Agent Registry).* API Hub can also act as an Ed25519-signed agentic `.skill` registry backed by Cloud Storage ([`distribute-agentic-skills`](https://docs.cloud.google.com/apigee/docs/apihub/tutorials/distribute-agentic-skills)).
 
+</div>
 </details>
 
 ### Pattern 2: Internal Native & Consumer-Facing MCP Server Governance Proxy (`MCP` to `MCP`)
@@ -207,8 +213,9 @@ Because MCP multiplexes all tool calls over a single HTTP endpoint (`POST /mcp`)
    * **Response Flow Filtering:** When `<ParsePayload>` is attached to the **Response Flow** as well, Apigee intercepts the backend MCP server's `tools/list` JSON response and **automatically strips any tool not listed in the caller's API Product**. A Bronze-tier agent and a Gold-tier agent calling the exact same `/mcp` endpoint receive tailored `tools/list` toolsets.
    * **Per-Tool Quotas:** Attach `<VerifyAPIKey>` (or `<OAuthV2>` `VerifyAccessToken`) with `<Operations><Operation>parsepayload.Parse-MCP-Request.operation</Operation></Operations>` and `<Quota>` (`<UseQuotaConfigInAPIProduct stepName="Verify-API-Key"/>`).
 
-<details markdown="1">
-<summary>📄 Verified `&lt;ParsePayload&gt;` Policy XML &amp; `API Product` JSON Configuration</summary>
+<details>
+<summary>📄 Verified <code>&lt;ParsePayload&gt;</code> Policy XML &amp; <code>API Product</code> JSON Configuration</summary>
+<div markdown="1">
 
 #### Step 1: Parse the MCP JSON-RPC Payload (`<ParsePayload>`)
 ```xml
@@ -255,6 +262,7 @@ Populates flow variable `parsepayload.Parse-MCP-Request.operation` (`"tools/list
 }
 ```
 
+</div>
 </details>
 
 ---
