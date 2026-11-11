@@ -56,15 +56,15 @@ While **Gemini Enterprise Agent Gateway** provides an **agent-side network and i
 
 ```mermaid
 flowchart LR
-    CALLERS["Any AI Caller\n(Google Agents · Developer IDEs · Partner Apps · Multi-Cloud)"]
-    APIGEE["Apigee X / Apigee Hybrid\nAPI Products · Token Quotas · Semantic Cache\nModel Armor · Cloud DLP · MCP Translation"]
+    CALLERS["Any AI Caller<br/>(Google Agents · Developer IDEs · Partner Apps · Multi-Cloud)"]
+    APIGEE["Apigee X / Apigee Hybrid<br/>API Products · Token Quotas · Semantic Cache<br/>Model Armor · Cloud DLP · MCP Translation"]
 
     CALLERS -->|"OIDC/JWT · API Key · mTLS"| APIGEE
 
-    APIGEE -->|"Routing & PT Spillover"| LLMS["Vertex AI · Azure OpenAI\nAnthropic · AWS Bedrock"]
-    APIGEE -->|"REST-to-MCP Translation"| REST["Enterprise REST / OpenAPI\nMicroservices & ERPs"]
-    APIGEE -->|"Token Exchange / Encrypted KVM"| MCP["Internal MCP Servers &\n3P SaaS MCP Platforms"]
-    APIGEE -->|"A2A Mediation"| A2A["Remote & Multi-Cloud\nA2A Agents"]
+    APIGEE -->|"Routing & PT Spillover"| LLMS["Vertex AI · Azure OpenAI<br/>Anthropic · AWS Bedrock"]
+    APIGEE -->|"REST-to-MCP Translation"| REST["Enterprise REST / OpenAPI<br/>Microservices & ERPs"]
+    APIGEE -->|"Token Exchange / Encrypted KVM"| MCP["Internal MCP Servers &<br/>3P SaaS MCP Platforms"]
+    APIGEE -->|"A2A Mediation"| A2A["Remote & Multi-Cloud<br/>A2A Agents"]
 ```
 
 In production deployments, Apigee covers seven distinct AI traffic paths:
@@ -95,20 +95,20 @@ Native semantic caching pairs [`<SemanticCacheLookup>`](https://docs.cloud.googl
 
 * Extracts the prompt via JSONPath, generates an embedding through the Vertex AI Embeddings API, and queries Vertex AI Vector Search (`:findNeighbors`) over REST or Private Service Connect gRPC.
 * Supports `DOT_PRODUCT_DISTANCE` (default similarity threshold `0.9`), `COSINE_DISTANCE`, `SQUARED_L2_DISTANCE`, and `L1_DISTANCE` on Apigee X (`1-18-0-apigee-4+`) and Apigee Hybrid (`1.17.0+`).
-* Returns `SemanticCacheLookup.<name>.cached_llm_response` directly on a hit (`cache_hit == true`), bypassing the LLM backend and saving 100% of downstream output token cost.
+* Returns the cached response directly on a semantic match, bypassing the LLM backend and saving 100% of downstream output token cost.
 
 ### 2.3 Real-Time Token Quotas & Spike Smoothing
 
 Apigee enforces token budgets directly against model usage via [`<LLMTokenQuota>`](https://docs.cloud.google.com/apigee/docs/api-platform/reference/policies/llm-token-quota-policy) and [`<PromptTokenLimit>`](https://docs.cloud.google.com/apigee/docs/api-platform/reference/policies/prompt-token-limit-policy):
 
-* **`<LLMTokenQuota>`** pairs an `EnforceOnly` check in the request flow with a `CountOnly` step in the response flow or SSE `<EventFlow>` to enforce token budgets per API Product (`<UseQuotaConfigInAPIProduct>`), developer app, or department across Gemini, OpenAI, and Anthropic. As of the [November 3, 2026 Apigee release](https://docs.cloud.google.com/apigee/docs/release-notes#November_03_2026), responses served from semantic cache are excluded from token quota deduction automatically.
-* **`<PromptTokenLimit>`** acts as a prompt-token spike arrest (`<UseEffectiveCount>true</UseEffectiveCount>`) to shield Provisioned Throughput reservations from sudden traffic bursts.
+* **`<LLMTokenQuota>`** enforces token budgets in the request flow and tallies streamed or unary response token usage per API Product, developer app, or department across Gemini, OpenAI, and Anthropic. As of the [November 3, 2026 Apigee release](https://docs.cloud.google.com/apigee/docs/release-notes#November_03_2026), responses served from semantic cache are excluded from token quota deduction automatically.
+* **`<PromptTokenLimit>`** acts as a prompt-token spike arrest to shield Provisioned Throughput reservations from sudden traffic bursts.
 
 ### 2.4 Prompt, Tool & Streaming SSE Guardrails
 
 Native Model Armor policies — [`<SanitizeUserPrompt>`](https://docs.cloud.google.com/apigee/docs/api-platform/reference/policies/sanitize-user-prompt-policy) and [`<SanitizeModelResponse>`](https://docs.cloud.google.com/apigee/docs/api-platform/reference/policies/sanitize-llm-response-policy#streaming-sse) — combine with [Cloud DLP (`content:deidentify`)](https://docs.cloud.google.com/sensitive-data-protection/docs/deidentify-sensitive-data) across both unary and streaming model calls:
 
-* **Tool argument and tool output inspection:** `<SanitizeUserPrompt>` includes `<FunctionResponseSource>` (`$.contents[-1].parts[-1].functionResponse.response`) to scan untrusted tool outputs before they re-enter the prompt, while `<SanitizeModelResponse>` includes `<FunctionCallSource>` (`$.candidates[-1].content.parts[-1].functionCall.args`) to inspect LLM-generated tool arguments.
+* **Tool argument and tool output inspection:** `<SanitizeUserPrompt>` supports [tool output scanning](https://docs.cloud.google.com/apigee/docs/api-platform/reference/policies/sanitize-user-prompt-policy#functionresponsesource) (`<FunctionResponseSource>`) before external tool results re-enter the prompt, while `<SanitizeModelResponse>` supports [tool argument inspection](https://docs.cloud.google.com/apigee/docs/api-platform/reference/policies/sanitize-llm-response-policy#functioncallsource) (`<FunctionCallSource>`) on model-generated function calls.
 * **Continuous SSE stream scanning:** Unlike Agent Gateway's unary-only Semantic Governance, `<SanitizeModelResponse>` operates inside SSE `<EventFlow>` pipelines across Gemini, OpenAI, and Anthropic (supported on Apigee X and Apigee Hybrid `v1.17.3+`). Setting `<ContinuousScan>true</ContinuousScan>` evaluates each streamed chunk together with prior chunks as one Model Armor stream—counting as a single Model Armor quota request with no total response token cap. Note that SDP redacted-text replacement is not applied in continuous streaming mode, and default Model Armor quota is `1,200 QPM` (`20 QPS`).
 * **Cloud DLP tokenization and safe debug logging:** Shared Flows and [Flow Hooks](https://docs.cloud.google.com/apigee/docs/api-platform/fundamentals/flow-hooks) can call `content:deidentify` synchronously for Format-Preserving Encryption (`FPE`) before prompts leave your trust boundary, or asynchronously in `PostClientFlow` after the client response has already been sent so redaction adds no client-facing latency before analytics/SIEM export. Restrict production `apigee.tracesessions.create` permissions via IAM conditions so ad-hoc debug traces cannot capture unredacted prompts.
 
@@ -139,7 +139,7 @@ For distributed tracing, propagate incoming W3C `traceparent` and `tracestate` h
 
 Enterprises typically run hundreds or thousands of REST APIs described by OpenAPI 3.0 specifications rather than native MCP servers. Apigee offers two supported ways to expose those APIs as MCP servers (`tools/list`, `tools/call`) without writing custom server code:
 
-1. **Managed Apigee MCP Discovery Proxy + API Hub:** Documented in [MCP in Apigee overview](https://docs.cloud.google.com/apigee/docs/api-platform/apigee-mcp/apigee-mcp-overview) and [Manage MCP proxies in API Hub](https://docs.cloud.google.com/apigee/docs/apihub/manage-mcp-proxies) (Apigee X and Apigee Hybrid `1.17.0+`). Register an OpenAPI `3.0.x` spec in API Hub, run **Configure MCP tools** to generate an MCP API entry (`apigee-managed-mcp-api`) and tool specs, then deploy the `MCPProxy` pointing `<HTTPTargetConnection><URL>` to `http://<ORG_NAME>.mcp.apigee.internal` (with `<SSLInfo><Enabled>true</Enabled></SSLInfo>` on HTTPS in Hybrid `1.17.0+`). Proxies declaring `<ProxyOperationMode>MCP</ProxyOperationMode>` work on any basepath rather than `/mcp` alone ([November 3, 2026 release notes](https://docs.cloud.google.com/apigee/docs/release-notes#November_03_2026)).
+1. **Managed Apigee MCP Discovery Proxy + API Hub:** Documented in [MCP in Apigee overview](https://docs.cloud.google.com/apigee/docs/api-platform/apigee-mcp/apigee-mcp-overview) and [Manage MCP proxies in API Hub](https://docs.cloud.google.com/apigee/docs/apihub/manage-mcp-proxies) (Apigee X and Apigee Hybrid `1.17.0+`). Register an OpenAPI `3.0.x` spec in API Hub, run **Configure MCP tools** to generate the managed MCP API entry and tool specs, and deploy the MCP proxy targeting `http://<ORG_NAME>.mcp.apigee.internal` (with backend TLS enabled in Hybrid `1.17.0+`). Proxies configured with MCP operation mode work on any basepath rather than `/mcp` alone ([November 3, 2026 release notes](https://docs.cloud.google.com/apigee/docs/release-notes#November_03_2026)).
 2. **Build-time static proxy generation (`apigee-go-gen`):** The open-source [`apigee-go-gen` MCP renderer](https://apigee.github.io/apigee-go-gen/render/mcp/) (`apigee-go-gen transform oas-to-mcp`) compiles an OpenAPI 3.0 spec into a self-contained Apigee proxy bundle (`check-req.js`, `transform-oas-mcp.js`) compatible with any Apigee X or Hybrid version.
 
 <details>
@@ -191,9 +191,9 @@ In multi-agent environments spanning Google ADK, LangGraph, Claude Agent SDK, or
 
 Documented in [Manage MCP tool access with API products](https://docs.cloud.google.com/apigee/docs/api-platform/apigee-mcp/manage-mcp-tool-access), Apigee lets platform teams govern and productize individual tools inside a shared MCP server—even though MCP sends every call to a single `POST /mcp` HTTP path using JSON-RPC (`"method": "tools/call"`):
 
-1. **Extract the logical MCP operation (`<ParsePayload>`):** Populates `parsepayload.Parse-MCP-Request.operation` as `"tools/list"` or `"tools/call/<tool_name>"`.
+1. **Extract the logical MCP operation (`<ParsePayload>`):** Resolves each JSON-RPC payload to `"tools/list"` or `"tools/call/<tool_name>"` (see the example policy configuration below).
 2. **Assign per-tool operations and quotas in an API Product:** Bind read-only tools at higher limits and sensitive write tools at tighter limits inside `payloadOperationGroup`.
-3. **Filter `tools/list` automatically in the Response Flow:** Attach `<ParsePayload>` to the response flow as well so Apigee strips any tool absent from the caller's API Product before the client sees `tools/list`. Pair `<VerifyAPIKey>` or `<OAuthV2>` (`<Operations><Operation>parsepayload.Parse-MCP-Request.operation</Operation></Operations>`) with `<Quota>` (`<UseQuotaConfigInAPIProduct stepName="Verify-API-Key"/>`) to throttle each tool independently.
+3. **Filter `tools/list` automatically in the Response Flow:** Attach `<ParsePayload>` to the response flow as well so Apigee strips any tool absent from the caller's API Product before the client sees `tools/list`. Pair `<VerifyAPIKey>` or `<OAuthV2>` with `<Quota>` referencing that parsed operation variable to throttle each tool independently.
 
 <details>
 <summary>Example <code>&lt;ParsePayload&gt;</code> Policy XML &amp; API Product JSON</summary>

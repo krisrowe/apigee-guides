@@ -80,49 +80,51 @@ Think of an AI agent as an employee working on a company-issued laptop, and your
 ## 2. End-to-End Dual-Gateway Architecture
 
 ```mermaid
-flowchart LR
+flowchart TB
     U["Human User / Client"] -->|"Prompt"| GE
 
     subgraph AgentSide["Agent Perimeter (Google Cloud Managed Runtimes)"]
-        direction TB
-        GE["Gemini Enterprise or\nVertex AI Agent Runtime\n(Per-Agent SPIFFE Identity)"]
-        AM["Agent Identity Auth Manager\n(Encrypted 3LO/2LO Token Broker)"]
-        AG["Agent Gateway\n(networkservices.agentGateways)\nPSC Attachment + Connectivity Template"]
-        AR["Agent Registry\n(agentregistry.googleapis.com)"]
+        direction LR
+        GE["Gemini Enterprise or<br/>Vertex AI Agent Runtime<br/>(Per-Agent SPIFFE Identity)"]
+        AM["Agent Identity Auth Manager<br/>(Encrypted 3LO/2LO Token Broker)"]
+        AG["Agent Gateway<br/>(networkservices.agentGateways)<br/>PSC Attachment + Connectivity Template"]
+        AR["Agent Registry<br/>(agentregistry.googleapis.com)"]
 
         subgraph AG_Policies["Agent Gateway Policy Engines"]
-            UAP["IAM Unified Access Policy\n(roles/iap.egressor) + Registry Metadata"]
-            SG["Semantic Governance\n(Non-Streaming Intent Gate)"]
-            MA1["Model Armor\n(Unary Content Inspection)"]
+            direction TB
+            UAP["IAM Unified Access Policy<br/>(roles/iap.egressor) + Registry Metadata"]
+            SG["Semantic Governance<br/>(Non-Streaming Intent Gate)"]
+            MA1["Model Armor<br/>(Unary Content Inspection)"]
         end
 
         GE -->|"24h mTLS Cert"| AG
-        AM -.->|"Encrypted Token\nDecrypted at Egress"| AG
+        AM -.->|"Encrypted Token<br/>Decrypted at Egress"| AG
         AG --- AG_Policies
         AR -.->|"Metadata"| UAP
     end
 
     subgraph ProducerSide["Resource, API & LLM Perimeter (GCP, Multi-Cloud, On-Prem)"]
-        direction TB
-        APIHUB["Apigee API Hub\n(apihub.googleapis.com)\nSpecs, Skills & Semantic Search"]
-        APIGEE["Apigee X or Apigee Hybrid\n(API, MCP & LLM Gateway)"]
+        direction LR
+        APIHUB["Apigee API Hub<br/>(apihub.googleapis.com)<br/>Specs, Skills & Semantic Search"]
+        APIGEE["Apigee X or Apigee Hybrid<br/>(API, MCP & LLM Gateway)"]
 
         subgraph Apigee_Policies["Apigee Mediation Policies"]
-            PP["ParsePayload · API Products · Quotas\nOAuth OBO (RFC 8693) · KVM Swap"]
-            MCP_DISC["Managed MCP Discovery Proxy\n(OpenAPI 3.0 to MCP)"]
-            LLM_POL["LLM Routing · PT Spillover\nSemantic Cache · Token Quotas · SSE Model Armor"]
+            direction TB
+            PP["ParsePayload · API Products · Quotas<br/>OAuth OBO (RFC 8693) · KVM Swap"]
+            MCP_DISC["Managed MCP Discovery Proxy<br/>(OpenAPI 3.0 to MCP)"]
+            LLM_POL["LLM Routing · PT Spillover<br/>Semantic Cache · Token Quotas · SSE Model Armor"]
         end
 
         APIHUB -.->|"Auto-Sync (Preview)"| AR
         APIHUB --- APIGEE
         APIGEE --- Apigee_Policies
 
-        APIGEE --> REST["Legacy REST / OpenAPI\nMicroservices & ERPs"]
-        APIGEE --> NATIVE_MCP["Custom Internal &\n3P SaaS MCP Servers"]
-        APIGEE --> LLM["Vertex AI · OpenAI\nAnthropic · Bedrock"]
+        APIGEE --> REST["Legacy REST / OpenAPI<br/>Microservices & ERPs"]
+        APIGEE --> NATIVE_MCP["Custom Internal &<br/>3P SaaS MCP Servers"]
+        APIGEE --> LLM["Vertex AI · OpenAI<br/>Anthropic · Bedrock"]
     end
 
-    AG -->|"Private PSC / TrustConfig TLS\nDPoP or Decrypted User OAuth"| APIGEE
+    AG -->|"Private PSC / TrustConfig TLS<br/>DPoP or Decrypted User OAuth"| APIGEE
 ```
 
 ---
@@ -319,18 +321,18 @@ Google Cloud documents three ways to compose **Agent Gateway** and **Apigee** to
 flowchart TB
     subgraph T1["Topology 1: Southbound Private PSC Bridge (Agent Perimeter -> Producer Perimeter)"]
         A1["Agent Runtime / Gemini Enterprise"] --> AG1["Agent Gateway (Egress)"]
-        AG1 -->|"PSC + Private DNS\n(TrustConfig or Internal ALB)"| AP1["Apigee X / Hybrid\n(Managed MCP + API Products + LLM Router)"]
+        AG1 -->|"PSC + Private DNS<br/>(TrustConfig or Internal ALB)"| AP1["Apigee X / Hybrid<br/>(Managed MCP + API Products + LLM Router)"]
         AP1 --> B1["Enterprise REST, MCP & LLMs"]
     end
 
     subgraph T2["Topology 2: North-South External & Multi-Cloud Fronting"]
-        EXT["Partner App / Mobile / Non-WIF Agent"] --> AP2["Apigee X / Hybrid\n(Edge OIDC · Quota · DLP · OBO Exchange)"]
-        AP2 -->|"Southbound PSC / WIF"| AG2["Agent Gateway (Ingress)\n+ Vertex AI Agent Runtime"]
+        EXT["Partner App / Mobile / Non-WIF Agent"] --> AP2["Apigee X / Hybrid<br/>(Edge OIDC · Quota · DLP · OBO Exchange)"]
+        AP2 -->|"Southbound PSC / WIF"| AG2["Agent Gateway (Ingress)<br/>+ Vertex AI Agent Runtime"]
     end
 
     subgraph T3["Topology 3: Inline Authorization Extension (Service Extensions ext_proc)"]
         A3["Agent Runtime"] --> AG3["Agent Gateway (Egress)"]
-        AG3 <-->|"CONTENT_AUTHZ over PSC\n(No-Target Verdict Proxy)"| EP["Apigee Extension Processor\n(Dedicated Service Extension Env)"]
+        AG3 <-->|"CONTENT_AUTHZ over PSC<br/>(No-Target Verdict Proxy)"| EP["Apigee Extension Processor<br/>(Dedicated Service Extension Env)"]
         AG3 -->|"Forwarded When Allowed"| DEST["Target LLM, Tool, or MCP Server"]
     end
 ```

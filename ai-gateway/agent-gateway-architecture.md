@@ -1,4 +1,4 @@
-# Agent Gateway Architecture Deep Dive (`Gemini Enterprise Agent Platform`)
+# Agent Gateway Architecture Deep Dive (Gemini Enterprise Agent Platform)
 
 <div class="subnav">
   <a href="/ai-gateway/">Apigee AI Gateway</a>
@@ -60,7 +60,7 @@ Each Agent Gateway instance operates in one of two mutually exclusive access pat
 Acts as an outbound forward proxy for an agent. Every outbound request the agent makes—calling an MCP server (`tools/list`, `tools/call`), invoking another agent over A2A, calling an LLM endpoint, or talking to Google Cloud telemetry and storage APIs—traverses the gateway.
 
 * **Vertex AI Agent Runtime (`aiplatform.googleapis.com` Reasoning Engine):** Bound during deployment via `pscInterfaceConfig` and `agentGatewayConfig.agentToAnywhereConfig.agentGateway`. Supports cross-project sharing (an agent in Project A can bind to an egress gateway in Project B in the **same region**, granted via `roles/networkservices.viewer`).
-* **Gemini Enterprise (`discoveryengine.googleapis.com`):** Bound at the engine level by patching `features.agent-Session-agent-gateway` and setting `agentGatewaySetting.defaultEgressAgentGateway`.
+* **Gemini Enterprise (`discoveryengine.googleapis.com`):** Bound at the engine level via `agentGatewaySetting.defaultEgressAgentGateway` (`GOOGLE_MANAGED` / `AGENT_TO_ANYWHERE`).
 * **VPC egress modes ([`set-up-vpc-connectivity#vpc-egress-modes`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/gateways/set-up-vpc-connectivity#vpc-egress-modes)):** `PRIVATE_RANGES_ONLY` (default) routes RFC 1918 / privately used public IPs and peered Cloud DNS private zones into your VPC while sending public HTTPS directly via Google's edge. `ALL_TRAFFIC` forces all outbound traffic (including `restricted.googleapis.com` at `199.36.153.4/30`) into your VPC for static Cloud NAT IP allowlisting, Cloud NGFW inspection, and VPC Service Controls (VPC-SC) enforcement.
 
 #### Inbound Ingress Governance (`CLIENT_TO_AGENT`)
@@ -199,7 +199,7 @@ Evaluated in **Preview**, [Semantic governance policies](https://docs.cloud.goog
 
 > *"Semantic governance policies use a large language model (LLM) to evaluate agent traffic against natural language rules at runtime... Semantic governance acts as an intent gate. It evaluates whether the proposed action aligns with the user's original prompt and complies with the defined natural language constraints."*
 
-The engine evaluates **five runtime inputs**: the current user prompt, Natural Language Constraints (`NLC`), the tools manifest, chat history, and the suggested tool invocation. It supports **Gemini (`:generateContent`)**, **Anthropic Messages API (`/v1/messages`)**, **Claude on GEAP (`:rawPredict`)**, **OpenAI Chat Completions**, **Mistral AI**, **GEAP OpenAI-compatible endpoints (including Llama)**, and **self-hosted vLLM** ([`#supported-providers`](https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/policies/semantic-governance-overview#supported-providers)), with Preview VPC-SC support ([September 25, 2026 release notes](https://docs.cloud.google.com/gemini-enterprise-agent-platform/release-notes#September_25_2026)). User-intent alignment checking can also be toggled (`sgpUserIntentMatching: DISABLED`, logged in `sgpUserIntentMatchingMode`, October 26, 2026) when only static NLC business rules are needed.
+The engine evaluates **five runtime inputs**: the current user prompt, Natural Language Constraints (`NLC`), the tools manifest, chat history, and the suggested tool invocation. It supports **Gemini (`:generateContent`)**, **Anthropic Messages API (`/v1/messages`)**, **Claude on GEAP (`:rawPredict`)**, **OpenAI Chat Completions**, **Mistral AI**, **GEAP OpenAI-compatible endpoints (including Llama)**, and **self-hosted vLLM** ([supported model families](https://docs.cloud.google.com/gemini-enterprise-agent-platform/govern/policies/semantic-governance-overview#supported-providers)), with Preview VPC-SC support ([September 25, 2026 release notes](https://docs.cloud.google.com/gemini-enterprise-agent-platform/release-notes#September_25_2026)). User-intent alignment checking can also be toggled (`sgpUserIntentMatching: DISABLED`, logged in `sgpUserIntentMatchingMode`, October 26, 2026) when only static NLC business rules are needed.
 
 Keep two operational caveats in mind:
 1. **Streaming model calls are not evaluated:** Endpoints using `:streamGenerateContent`, `:streamRawPredict`, or `"stream": true` bypass Semantic Governance; pair non-streaming calls or deterministic controls where tool-call gating is mandatory.
