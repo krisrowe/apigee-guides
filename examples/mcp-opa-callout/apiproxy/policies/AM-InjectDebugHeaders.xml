@@ -5,6 +5,9 @@
     <Headers>
       <Header name="X-OPA-Decision">{opa.decision}</Header>
       <Header name="X-OPA-Reason">{opa.reason}</Header>
+      <Header name="X-Caller-Sub">{opa.caller_sub}</Header>
+      <Header name="X-Caller-Role">{opa.caller_role}</Header>
+      <Header name="X-Identity-Source">{opa.identity_source}</Header>
       <Header name="X-Callout-Mode">{opa.callout_mode}</Header>
       <Header name="X-Callout-Seen-Body-Len">{opa.seen_body_len}</Header>
       <Header name="X-Apigee-PostCallout-CopyPathSuffix">{target.copy.pathsuffix}</Header>

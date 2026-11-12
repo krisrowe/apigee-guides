@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  Demo convenience only: DecodeJWT extracts claims without verifying cryptographic signatures
+  so this sample works without provisioning an IdP or JWKS endpoint.
+  In production, replace DecodeJWT with VerifyJWT (JWKS) or OAuthV2 before trusting claims.
+-->
+<DecodeJWT async="false" continueOnError="true" enabled="true" name="JWT-DecodeCaller">
+  <DisplayName>JWT-DecodeCaller</DisplayName>
+  <Source>caller.jwt</Source>
+</DecodeJWT>

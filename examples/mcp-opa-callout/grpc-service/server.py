@@ -61,17 +61,55 @@ def evaluate_mcp_opa(body_str: str, caller_role: str) -> tuple[str, str, str]:
     return "DENY", "UNKNOWN_TOOL", f"Tool '{tool_name}' is not allowlisted"
 
 
+def get_flow_var(flow_vars, name: str, default: str = "") -> str:
+    fv = flow_vars.get(name)
+    if fv is None:
+        return default
+    kind = fv.WhichOneof("value")
+    if kind == "string":
+        return fv.string
+    if kind in ("int32", "int64", "bool", "double"):
+        return str(getattr(fv, kind))
+    return default
+
+
 class ExternalCalloutServicer(external_callout_pb2_grpc.ExternalCalloutServiceServicer):
     def ProcessMessage(self, request, context):
-        mode = get_header(request.request.headers, "x-callout-mode", "partial").lower()
-        caller_role = get_header(request.request.headers, "x-caller-role", "support_agent")
+        default_mode = os.environ.get("CALLOUT_MODE", "partial").strip().lower() or "partial"
+        override_mode = get_header(request.request.headers, "x-callout-mode").strip().lower()
+        if not override_mode:
+            override_mode = get_flow_var(request.additional_flow_variables, "opa.callout_mode").strip().lower()
+        mode = override_mode or default_mode
+
+        jwt_sub = get_flow_var(request.additional_flow_variables, "jwt.JWT-DecodeCaller.claim.sub") or get_flow_var(
+            request.additional_flow_variables, "jwt.JWT-DecodeCaller.decoded.claim.sub"
+        )
+        jwt_role = get_flow_var(request.additional_flow_variables, "jwt.JWT-DecodeCaller.claim.role") or get_flow_var(
+            request.additional_flow_variables, "jwt.JWT-DecodeCaller.decoded.claim.role"
+        )
+        header_role = get_header(request.request.headers, "x-caller-role")
+        if jwt_role:
+            caller_role = jwt_role
+            identity_source = "jwt_flow_variable"
+        elif header_role:
+            caller_role = header_role
+            identity_source = "header_fallback"
+        else:
+            caller_role = "support_agent"
+            identity_source = "default"
+        caller_sub = jwt_sub or "anonymous"
         body_len = len(request.request.content or "")
 
         decision, code, reason = evaluate_mcp_opa(request.request.content, caller_role)
         log.info(
-            "mode=%s role=%s body_len=%d incoming_copy_pathsuffix=%s decision=%s code=%s",
+            "mode=%s (env=%s override=%s) sub=%s role=%s source=%s flow_vars=%s body_len=%d incoming_copy_pathsuffix=%s decision=%s code=%s",
             mode,
+            default_mode,
+            override_mode or "-",
+            caller_sub,
             caller_role,
+            identity_source,
+            list(request.additional_flow_variables.keys()),
             body_len,
             request.target.copy_path_suffix,
             decision,
@@ -82,6 +120,9 @@ class ExternalCalloutServicer(external_callout_pb2_grpc.ExternalCalloutServiceSe
             "opa.decision": external_callout_pb2.FlowVariable(string=decision),
             "opa.error_code": external_callout_pb2.FlowVariable(string=code),
             "opa.reason": external_callout_pb2.FlowVariable(string=reason),
+            "opa.caller_sub": external_callout_pb2.FlowVariable(string=caller_sub),
+            "opa.caller_role": external_callout_pb2.FlowVariable(string=caller_role),
+            "opa.identity_source": external_callout_pb2.FlowVariable(string=identity_source),
             "opa.callout_mode": external_callout_pb2.FlowVariable(string=mode),
             "opa.seen_body_len": external_callout_pb2.FlowVariable(int32=body_len),
         }

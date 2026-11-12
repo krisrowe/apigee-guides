@@ -8,5 +8,7 @@
   <Configurations>
     <Property name="with.request.content">true</Property>
     <Property name="with.request.headers">true</Property>
+    <FlowVariable>jwt.JWT-DecodeCaller.decoded.claim.sub</FlowVariable>
+    <FlowVariable>jwt.JWT-DecodeCaller.decoded.claim.role</FlowVariable>
   </Configurations>
 </ExternalCallout>

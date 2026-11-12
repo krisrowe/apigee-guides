@@ -3,6 +3,8 @@
   <DisplayName>mcp-opa-callout</DisplayName>
   <Description>Reference proxy demonstrating Apigee ExternalCallout (gRPC) for MCP tool/argument authorization and fixing partial MessageContext request overwrites</Description>
   <Policies>
+    <Policy>EV-ExtractJwt</Policy>
+    <Policy>JWT-DecodeCaller</Policy>
     <Policy>AM-BackupRequestContext</Policy>
     <Policy>AM-RestoreTargetFlags</Policy>
     <Policy>AM-RestoreRequestPayload</Policy>

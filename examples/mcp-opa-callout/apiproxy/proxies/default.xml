@@ -18,6 +18,13 @@
       <Condition>(proxy.pathsuffix MatchesPath "/mcp") or (proxy.pathsuffix MatchesPath "/mcp/**")</Condition>
       <Request>
         <Step>
+          <Name>EV-ExtractJwt</Name>
+        </Step>
+        <Step>
+          <Name>JWT-DecodeCaller</Name>
+          <Condition>caller.jwt != null</Condition>
+        </Step>
+        <Step>
           <Name>AM-BackupRequestContext</Name>
           <Condition>request.header.x-gateway-fix == "backup-restore"</Condition>
         </Step>

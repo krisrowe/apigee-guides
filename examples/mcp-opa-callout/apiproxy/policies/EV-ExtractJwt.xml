@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ExtractVariables async="false" continueOnError="true" enabled="true" name="EV-ExtractJwt">
+  <DisplayName>EV-ExtractJwt</DisplayName>
+  <Source>request</Source>
+  <Header name="Authorization">
+    <Pattern>Bearer {caller.jwt}</Pattern>
+  </Header>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</ExtractVariables>

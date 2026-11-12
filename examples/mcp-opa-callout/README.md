@@ -86,6 +86,8 @@ examples/mcp-opa-callout/
     │   ├── AM-RestoreTargetFlags.xml
     │   ├── AM-TargetEchoResponse.xml
     │   ├── EC-OpaPolicy.xml
+    │   ├── EV-ExtractJwt.xml
+    │   ├── JWT-DecodeCaller.xml
     │   └── RF-OpaDenied.xml
     ├── proxies/default.xml
     └── targets/default.xml
@@ -227,21 +229,30 @@ curl -si -X POST "https://${APIGEE_HOST}/mcp-opa-callout/mcp" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_order","arguments":{"order_id":"ORD-1001"}}}'
 ```
 
-### 4. Verify MCP Tool & Argument `ABAC` (`403` vs `200`)
+### 4. Verify MCP Tool & Argument `ABAC` via Decoded JWT Claims (`403` vs `200`)
+
+`EV-ExtractJwt` strips the `Bearer ` prefix and `JWT-DecodeCaller` (`DecodeJWT`) extracts `sub` and `role` claims from any 3-segment JWT without requiring an IdP or JWKS setup for the demo (in production, replace `DecodeJWT` with `VerifyJWT` + JWKS). `EC-OpaPolicy` forwards those claims as `<FlowVariable>` entries, while requests without an `Authorization` header fall back to `x-caller-role`. On the Cloud Run gRPC server, `CALLOUT_MODE` sets the server default (`partial` or `echo`, defaulting to `partial`), and per-request `x-callout-mode` overrides it.
 
 ```bash
+# Helper to build a 3-segment test JWT (Apigee DecodeJWT expects a non-empty signature segment)
+make_jwt() {
+  python3 -c 'import base64,json,sys
+def b64(d): return base64.urlsafe_b64encode(json.dumps(d,separators=(",",":")).encode()).rstrip(b"=").decode()
+print(b64({"alg":"HS256","typ":"JWT"}) + "." + b64({"sub":sys.argv[1],"role":sys.argv[2]}) + "." + base64.urlsafe_b64encode(b"demo-sig").rstrip(b"=").decode())' "$1" "$2"
+}
+
 # Denied (support_agent refund > 250) -> HTTP 403 JSON-RPC error
 curl -si -X POST "https://${APIGEE_HOST}/mcp-opa-callout/mcp" \
   -H "Content-Type: application/json" \
   -H "x-callout-mode: echo" \
-  -H "x-caller-role: support_agent" \
+  -H "Authorization: Bearer $(make_jwt 'alice@example.com' 'support_agent')" \
   -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"issue_refund","arguments":{"order_id":"ORD-1001","amount":500,"reason":"damaged"}}}'
 
-# Allowed (finance_approver refund > 250) -> HTTP 200
+# Allowed (finance_approver refund > 250) -> HTTP 200 w/ X-Identity-Source: jwt_flow_variable
 curl -si -X POST "https://${APIGEE_HOST}/mcp-opa-callout/mcp" \
   -H "Content-Type: application/json" \
   -H "x-callout-mode: echo" \
-  -H "x-caller-role: finance_approver" \
+  -H "Authorization: Bearer $(make_jwt 'bob@example.com' 'finance_approver')" \
   -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"issue_refund","arguments":{"order_id":"ORD-1001","amount":500,"reason":"damaged"}}}'
 ```
 
