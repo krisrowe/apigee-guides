@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<AssignMessage async="false" continueOnError="false" enabled="true" name="AM-TargetEchoResponse">
+  <DisplayName>AM-TargetEchoResponse</DisplayName>
+  <Set>
+    <StatusCode>200</StatusCode>
+    <Headers>
+      <Header name="X-Target-Received-URI">{request.uri}</Header>
+      <Header name="X-Target-Received-Query">{request.querystring}</Header>
+      <Header name="X-Target-Received-Content-Length">{request.header.content-length}</Header>
+      <Header name="X-Target-Received-Body">{request.content}</Header>
+    </Headers>
+    <Payload contentType="text/plain">target_received_uri={request.uri}
+target_received_query={request.querystring}
+target_received_content_length={request.header.content-length}
+target_received_body={request.content}</Payload>
+  </Set>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</AssignMessage>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<AssignMessage async="false" continueOnError="false" enabled="true" name="AM-BackupRequestContext">
+  <DisplayName>AM-BackupRequestContext</DisplayName>
+  <AssignVariable>
+    <Name>opa.backup.request.content</Name>
+    <Ref>request.content</Ref>
+  </AssignVariable>
+  <AssignVariable>
+    <Name>opa.backup.target.copy.pathsuffix</Name>
+    <Ref>target.copy.pathsuffix</Ref>
+  </AssignVariable>
+  <AssignVariable>
+    <Name>opa.backup.target.copy.queryparams</Name>
+    <Ref>target.copy.queryparams</Ref>
+  </AssignVariable>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</AssignMessage>

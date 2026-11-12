@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<APIProxy revision="1" name="mcp-opa-callout">
+  <DisplayName>mcp-opa-callout</DisplayName>
+  <Description>Reference proxy demonstrating Apigee ExternalCallout (gRPC) for MCP tool/argument authorization and fixing partial MessageContext request overwrites</Description>
+  <Policies>
+    <Policy>AM-BackupRequestContext</Policy>
+    <Policy>AM-RestoreTargetFlags</Policy>
+    <Policy>AM-RestoreRequestPayload</Policy>
+    <Policy>AM-InjectDebugHeaders</Policy>
+    <Policy>AM-TargetEchoResponse</Policy>
+    <Policy>EC-OpaPolicy</Policy>
+    <Policy>RF-OpaDenied</Policy>
+  </Policies>
+  <ProxyEndpoints>
+    <ProxyEndpoint>default</ProxyEndpoint>
+  </ProxyEndpoints>
+  <TargetEndpoints>
+    <TargetEndpoint>default</TargetEndpoint>
+  </TargetEndpoints>
+</APIProxy>

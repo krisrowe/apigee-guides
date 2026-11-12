@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ProxyEndpoint name="default">
+  <PreFlow name="PreFlow">
+    <Request/>
+    <Response/>
+  </PreFlow>
+  <Flows>
+    <Flow name="target-echo">
+      <Condition>(proxy.pathsuffix MatchesPath "/target-echo/**") or (proxy.pathsuffix MatchesPath "/target-echo")</Condition>
+      <Request/>
+      <Response>
+        <Step>
+          <Name>AM-TargetEchoResponse</Name>
+        </Step>
+      </Response>
+    </Flow>
+    <Flow name="mcp">
+      <Condition>(proxy.pathsuffix MatchesPath "/mcp") or (proxy.pathsuffix MatchesPath "/mcp/**")</Condition>
+      <Request>
+        <Step>
+          <Name>AM-BackupRequestContext</Name>
+          <Condition>request.header.x-gateway-fix == "backup-restore"</Condition>
+        </Step>
+        <Step>
+          <Name>EC-OpaPolicy</Name>
+        </Step>
+        <Step>
+          <Name>AM-RestoreTargetFlags</Name>
+          <Condition>request.header.x-gateway-fix == "backup-restore"</Condition>
+        </Step>
+        <Step>
+          <Name>AM-RestoreRequestPayload</Name>
+          <Condition>(request.header.x-gateway-fix == "backup-restore") and (opa.backup.request.content != null) and (opa.backup.request.content != "") and (request.verb != "GET") and (request.verb != "HEAD")</Condition>
+        </Step>
+        <Step>
+          <Name>RF-OpaDenied</Name>
+          <Condition>(opa.decision == "DENY") and (request.header.x-bypass-deny != "true")</Condition>
+        </Step>
+      </Request>
+      <Response>
+        <Step>
+          <Name>AM-InjectDebugHeaders</Name>
+        </Step>
+      </Response>
+    </Flow>
+  </Flows>
+  <PostFlow name="PostFlow">
+    <Request/>
+    <Response/>
+  </PostFlow>
+  <HTTPProxyConnection>
+    <BasePath>/mcp-opa-callout</BasePath>
+  </HTTPProxyConnection>
+  <RouteRule name="loopback-target-echo">
+    <Condition>(proxy.pathsuffix MatchesPath "/target-echo/**") or (proxy.pathsuffix MatchesPath "/target-echo")</Condition>
+  </RouteRule>
+  <RouteRule name="default">
+    <TargetEndpoint>default</TargetEndpoint>
+  </RouteRule>
+</ProxyEndpoint>

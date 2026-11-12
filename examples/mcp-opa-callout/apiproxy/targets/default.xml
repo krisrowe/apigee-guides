@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<TargetEndpoint name="default">
+  <PreFlow name="PreFlow">
+    <Request/>
+    <Response/>
+  </PreFlow>
+  <PostFlow name="PostFlow">
+    <Request/>
+    <Response/>
+  </PostFlow>
+  <HTTPTargetConnection>
+    <!-- Replace APIGEE_HOST with your Apigee environment group hostname before deploying -->
+    <URL>https://APIGEE_HOST/mcp-opa-callout/target-echo</URL>
+  </HTTPTargetConnection>
+</TargetEndpoint>

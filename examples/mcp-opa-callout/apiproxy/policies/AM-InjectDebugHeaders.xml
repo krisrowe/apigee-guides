@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<AssignMessage async="false" continueOnError="false" enabled="true" name="AM-InjectDebugHeaders">
+  <DisplayName>AM-InjectDebugHeaders</DisplayName>
+  <Add>
+    <Headers>
+      <Header name="X-OPA-Decision">{opa.decision}</Header>
+      <Header name="X-OPA-Reason">{opa.reason}</Header>
+      <Header name="X-Callout-Mode">{opa.callout_mode}</Header>
+      <Header name="X-Callout-Seen-Body-Len">{opa.seen_body_len}</Header>
+      <Header name="X-Apigee-PostCallout-CopyPathSuffix">{target.copy.pathsuffix}</Header>
+      <Header name="X-Apigee-PostCallout-CopyQueryParams">{target.copy.queryparams}</Header>
+      <Header name="X-Gateway-Fix">{request.header.x-gateway-fix}</Header>
+    </Headers>
+  </Add>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</AssignMessage>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<RaiseFault async="false" continueOnError="false" enabled="true" name="RF-OpaDenied">
+  <DisplayName>RF-OpaDenied</DisplayName>
+  <FaultResponse>
+    <Set>
+      <StatusCode>403</StatusCode>
+      <ReasonPhrase>Forbidden</ReasonPhrase>
+      <Headers>
+        <Header name="X-OPA-Decision">{opa.decision}</Header>
+        <Header name="X-OPA-Error-Code">{opa.error_code}</Header>
+      </Headers>
+      <Payload contentType="application/json">{"jsonrpc":"2.0","error":{"code":-32003,"message":"{opa.reason}","data":{"opa_error_code":"{opa.error_code}","callout_mode":"{opa.callout_mode}"}}}</Payload>
+    </Set>
+  </FaultResponse>
+  <IgnoreUnresolvedVariables>true</IgnoreUnresolvedVariables>
+</RaiseFault>
