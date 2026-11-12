@@ -6,7 +6,7 @@ Runnable reference architecture and implementation guide for enforcing **user-, 
 
 ## 1. Why & When to Use This
 
-Enterprises adopting MCP quickly hit a wall with gateway-only controls: they want Apigee to handle traffic management, identity validation, quotas, and enforcement while delegating fine-grained **user-, role-, and argument-level tool authorization** to an existing external Policy Decision Point (such as Open Policy Agent / OPA), without embedding complex business rules inside proxy JavaScript.
+Enterprises adopting MCP quickly hit a wall with gateway-only controls: they want Apigee to handle traffic management, identity validation, quotas, and enforcement while delegating fine-grained **user-, role-, and argument-level tool authorization** to their existing Policy Decision Point (such as Open Policy Agent / OPA), without embedding complex business logic inside the AI gateway.
 
 Unlike REST APIs where permissions map cleanly to HTTP verbs and URL paths (`GET /orders` vs. `POST /refunds`), **MCP multiplexes every tool invocation onto a single HTTP endpoint** (`POST /mcp`) carrying a JSON-RPC 2.0 body:
 
