@@ -75,7 +75,7 @@ def get_flow_var(flow_vars, name: str, default: str = "") -> str:
 
 class ExternalCalloutServicer(external_callout_pb2_grpc.ExternalCalloutServiceServicer):
     def ProcessMessage(self, request, context):
-        default_mode = os.environ.get("CALLOUT_MODE", "partial").strip().lower() or "partial"
+        default_mode = os.environ.get("CALLOUT_MODE", "echo").strip().lower() or "echo"
         override_mode = get_header(request.request.headers, "x-callout-mode").strip().lower()
         if not override_mode:
             override_mode = get_flow_var(request.additional_flow_variables, "opa.callout_mode").strip().lower()
@@ -127,16 +127,16 @@ class ExternalCalloutServicer(external_callout_pb2_grpc.ExternalCalloutServiceSe
             "opa.seen_body_len": external_callout_pb2.FlowVariable(int32=body_len),
         }
 
-        if mode == "echo":
-            # Option A: Echo incoming request and target sub-messages so Apigee does not overwrite them with proto defaults
+        if mode == "partial":
+            # Decision-only mode ("partial"): return ONLY additional_flow_variables (reproduces proto3 default overwrite unless proxy restores context)
             return external_callout_pb2.MessageContext(
-                request=request.request,
-                target=request.target,
                 additional_flow_variables=flow_vars,
             )
 
-        # Default ("partial"): return ONLY additional_flow_variables (reproduces Apigee merge() overwrite)
+        # Default ("echo" / Option A): echo incoming request and target sub-messages so Apigee preserves payload and routing flags
         return external_callout_pb2.MessageContext(
+            request=request.request,
+            target=request.target,
             additional_flow_variables=flow_vars,
         )
 

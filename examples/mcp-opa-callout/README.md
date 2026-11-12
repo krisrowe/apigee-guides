@@ -1,10 +1,12 @@
-# Fine-Grained MCP Tool Authorization with Apigee `ExternalCallout` (gRPC + OPA)
+# Fine-Grained MCP Tool Authorization with Apigee + External Policy Engines (OPA)
 
-Runnable reference architecture and live troubleshooting guide demonstrating how to enforce **attribute-based access control (`ABAC`)** on [Model Context Protocol (`MCP`)](https://modelcontextprotocol.io/introduction) `tools/call` payloads using Apigee's [`ExternalCallout`](https://docs.cloud.google.com/apigee/docs/api-platform/reference/policies/external-callout-policy) policy over gRPC, while avoiding a critical `MessageContext` payload-overwrite pitfall.
+Runnable reference architecture and implementation guide for enforcing **user-, role-, and argument-level authorization (`ABAC`)** on [Model Context Protocol (`MCP`)](https://modelcontextprotocol.io/introduction) tool calls (`tools/call`) using Apigee as the Policy Enforcement Point (PEP) and an external gRPC policy engine (OPA-style Rego logic over `<ExternalCallout>`) as the Policy Decision Point (PDP).
 
 ---
 
-## 1. Why API Products Are Not Always Enough for MCP
+## 1. Why & When to Use This
+
+Enterprises adopting MCP quickly hit a wall with gateway-only controls: they want Apigee to handle traffic management, identity validation, quotas, and enforcement while delegating fine-grained **user-, role-, and argument-level tool authorization** to an existing external Policy Decision Point (such as Open Policy Agent / OPA), without embedding complex business rules inside proxy JavaScript.
 
 Unlike REST APIs where permissions map cleanly to HTTP verbs and URL paths (`GET /orders` vs. `POST /refunds`), **MCP multiplexes every tool invocation onto a single HTTP endpoint** (`POST /mcp`) carrying a JSON-RPC 2.0 body:
 
@@ -20,20 +22,24 @@ Unlike REST APIs where permissions map cleanly to HTTP verbs and URL paths (`GET
 }
 ```
 
-- **Apigee API Products (`payloadOperationGroup`)** handle **application-level entitlements** (*"Can this client app invoke `tools/call/issue_refund`?"*).
-- **External Policy Engines (such as OPA / Rego over `ExternalCallout`)** handle **user- & argument-level `ABAC`** without embedding business rules in proxy JavaScript (for example: *"Allow `support_agent` to call `get_order`, allow `issue_refund` up to `amount <= 250`, and require `finance_approver` above `250`."*).
+### How Controls Layer Together
+
+| Control Layer | What It Enforces | Best Tool |
+| :--- | :--- | :--- |
+| **App & Client Entitlements** | *"Can this registered client app see or call `issue_refund` at all, and how fast?"* | Apigee **API Products** (`<ParsePayload>` `MCP` + `payloadOperationGroup` + `<Quota>`) |
+| **User, Role & Argument `ABAC`** | *"Can **Bob (`support_agent`)** call `issue_refund` for `amount = 500`, or does > `$250` require `finance_approver`?"* | **External PDP (`<ExternalCallout>` + OPA / Rego)** *(this guide)* |
 
 ```mermaid
 sequenceDiagram
     participant Client as MCP Client / Agent
-    participant Apigee as Apigee X / Hybrid Proxy
-    participant Grpc as Cloud Run gRPC Policy Server (h2c)
+    participant Apigee as Apigee X / Hybrid Proxy (PEP)
+    participant Grpc as Cloud Run gRPC Policy Server (PDP / h2c)
     participant Target as Downstream MCP Server
 
-    Client->>Apigee: POST /mcp (JSON-RPC tools/call + Headers)
+    Client->>Apigee: POST /mcp (JSON-RPC tools/call + JWT)
     Apigee->>Grpc: gRPC ProcessMessage(MessageContext{request, target, flowVars})
-    Note over Grpc: Evaluates method, params.name, arguments & role
-    Grpc-->>Apigee: MessageContext{additional_flow_variables + request + target}
+    Note over Grpc: Evaluates method, params.name, arguments & caller claims
+    Grpc-->>Apigee: MessageContext{additional_flow_variables [+ request, target]}
     alt opa.decision == "DENY"
         Apigee-->>Client: HTTP 403 JSON-RPC Error (-32003)
     else opa.decision == "ALLOW"
@@ -44,26 +50,30 @@ sequenceDiagram
 
 ---
 
-## 2. The `ExternalCallout` Overwrite Pitfall (and Both Fixes)
+## 2. Solution-Level Architectural Options & Tradeoffs
 
-When integrating a custom gRPC server via [`external_callout.proto`](grpc-service/external_callout.proto), developers frequently attempt to return **only** `additional_flow_variables` (`opa.decision`, `opa.reason`) and leave `request` and `target` unset in the returned `MessageContext`.
+Integrating an external gRPC PDP into Apigee requires understanding one critical contract difference between `<ExternalCallout>` and standard HTTP callouts like `<ServiceCallout>`: **`ExternalCallout` exchanges full `MessageContext` protobuf state (`external_callout.proto`), not an isolated decision JSON payload.**
 
-**What happens at runtime:**
-1. **`request.content` is wiped to `""`:** When the `request` sub-message is omitted from the gRPC response, Protocol Buffers supplies default values (`content = ""`), causing Apigee to overwrite the incoming HTTP request body before forwarding to the target (unless streaming is enabled on the flow).
-2. **`target.copy.pathsuffix` and `target.copy.queryparams` reset to `false`:** Leaving `target` unset applies Protobuf default booleans (`false`).
-3. **`<RequestVariable>` and `<ResponseVariable>` have no effect:** Unlike [`ServiceCallout`](https://docs.cloud.google.com/apigee/docs/api-platform/reference/policies/service-callout-policy), the [`ExternalCallout` schema](https://docs.cloud.google.com/apigee/docs/api-platform/reference/policies/external-callout-policy) does not define `<RequestVariable>` or `<ResponseVariable>`. Setting them on `ExternalCallout` is silently ignored, and `with.request.content` / `with.request.headers` filter **outbound** data only.
+Unlike [`ServiceCallout`](https://docs.cloud.google.com/apigee/docs/api-platform/reference/policies/service-callout-policy), the [`ExternalCallout` schema](https://docs.cloud.google.com/apigee/docs/api-platform/reference/policies/external-callout-policy) does not have `<RequestVariable>` or `<ResponseVariable>`. When the gRPC server returns a `MessageContext`, Apigee merges `request`, `target`, and `additional_flow_variables` back into the active runtime context.
 
-### Two Verified Solutions (Which Should You Use?)
+### The Proto3 Default Gotcha (When Integrating a Decision-Only PDP)
 
-| Approach | How It Works | Key Tradeoff & Caveat |
-| :--- | :--- | :--- |
-| **Option A: gRPC Server Echoes Context** | Return `MessageContext(request=incoming.request, target=incoming.target, additional_flow_variables=...)` ([`server.py`](grpc-service/server.py)). | **Zero proxy changes**, **but** sends request bodies both directions over gRPC and requires keeping `<Property name="with.request.content">true</Property>` and `with.request.headers=true`. If `with.request.content` is `false`, `incoming.request.content` arrives empty and echoing it back still wipes `request.content`. |
-| **Option B: Gateway `AssignMessage` Backup/Restore** | Snapshot `request.content`, `target.copy.pathsuffix`, and `target.copy.queryparams` into custom flow variables before `ExternalCallout`, then restore via `<AssignVariable><Ref>` immediately after. | **Keeps the gRPC authz service decision-only** (no need to echo payloads back over gRPC, works even if `with.request.content` is `false`, safely preserves raw JSON bytes, and automatically recalculates `Content-Length`). |
+If a gRPC PDP returns **only** `additional_flow_variables` (`opa.decision`, `opa.reason`) and omits the `request` and `target` sub-messages in [`external_callout.proto`](grpc-service/external_callout.proto), Proto3 supplies empty default values on the response:
+1. **`request.content` is wiped to `""` (`Content-Length: 0`):** Apigee merges the empty default `Request` sub-message over the live request body before forwarding to the target (unless streaming is enabled).
+2. **`target.copy.pathsuffix` and `target.copy.queryparams` reset to `false`:** Empty default `Target` booleans overwrite the proxy's outbound path/query forwarding flags.
+3. **`with.request.content` only controls what Apigee sends *out*:** Setting `<Property name="with.request.content">false</Property>` does not protect `request.content` from being overwritten on the return trip if the gRPC server does not handle omission safely or echoes an empty `request`.
 
-- **When to choose Option A:** Your OPA/authz gRPC server returns `request` and `target` alongside `additional_flow_variables` (or intentionally mutates headers/payloads in-flight). Deploy just `EC-OpaPolicy` + `RF-OpaDenied`.
-- **When to choose Option B:** Your OPA/authz gRPC server returns **only** `additional_flow_variables` (staying lightweight and decision-only) or you want to disable `with.request.content` without breaking backends. Keep `AM-BackupRequestContext` → `EC-OpaPolicy` → `AM-RestoreTargetFlags` → `AM-RestoreRequestPayload` in your proxy or SharedFlow.
+### Choosing Between Option A (Recommended) and Option B
 
-> **How this single demo proxy covers both scenarios:** Instead of maintaining duplicate proxy bundles, [`apiproxy/proxies/default.xml`](apiproxy/proxies/default.xml) and [`server.py`](grpc-service/server.py) toggle both behaviors via request headers (`x-callout-mode` and `x-gateway-fix`) so you can verify all three paths against one deployment. When lifting **Option B** into a production proxy or SharedFlow, remove `request.header.x-gateway-fix == "backup-restore"` from the `<Condition>` expressions on `AM-BackupRequestContext`, `AM-RestoreTargetFlags`, and `AM-RestoreRequestPayload` (or replace it with a KVM toggle).
+This repository implements **Option A** as the primary default and includes an optional header toggle for **Option B** so you can evaluate both patterns against your security team's PDP architecture:
+
+| Option | How It Works | Proxy Footprint | Tradeoffs & Caveats | When to Choose |
+| :--- | :--- | :--- | :--- | :--- |
+| **Option A: Server Echoes Context** *(Primary Default · `CALLOUT_MODE=echo`)* | The gRPC server copies `incoming.request` and `incoming.target` onto the returned `MessageContext` alongside `additional_flow_variables` ([`server.py`](grpc-service/server.py)), matching [Google's official sample stubs](https://github.com/apigee/external-callout). | **Minimal (`EC-OpaPolicy` + `RF-OpaDenied`)** — zero Save/Restore policies needed. | Sends request bodies in both directions over gRPC and requires `<Property name="with.request.content">true</Property>` and `with.request.headers=true`. If `with.request.content` is `false`, `incoming.request.content` arrives empty and echoing it back still wipes the payload. | **Recommended whenever you own the gRPC PDP or run a thin adapter** in front of OPA (or intentionally mutate request headers/bodies in-flight). |
+| **Option B: Gateway `AssignMessage` Backup/Restore** *(Defensive Proxy · `CALLOUT_MODE=partial` + `x-gateway-fix: backup-restore`)* | Snapshot `request.content`, `target.copy.pathsuffix`, and `target.copy.queryparams` into custom flow variables before `ExternalCallout`, then restore them immediately after via `<AssignVariable><Ref>`. | Adds `AM-BackupRequestContext` before `ExternalCallout` and `AM-RestoreTargetFlags` + `AM-RestoreRequestPayload` after. | Keeps the proxy resilient even when the gRPC server never returns `request` or `target`, works even if `with.request.content` is disabled (header/claim-only checks), and forces `Content-Length` recalculation automatically. | **Choose when integrating a third-party or security-owned decision-only PDP** whose gRPC server returns only `additional_flow_variables` and cannot be modified. |
+
+> **How this single demo proxy covers both options:** Rather than maintaining two separate proxy bundles, [`apiproxy/proxies/default.xml`](apiproxy/proxies/default.xml) and [`server.py`](grpc-service/server.py) default to **Option A (`CALLOUT_MODE=echo`)** and support per-request overrides (`x-callout-mode: partial` and `x-gateway-fix: backup-restore`) so you can verify Option A, reproduce the decision-only overwrite behavior, and verify Option B against one deployment. When lifting **Option B** into a production SharedFlow, remove `request.header.x-gateway-fix == "backup-restore"` from the backup/restore `<Condition>` expressions (or bind them to a KVM flag).
+
 
 ---
 
@@ -76,8 +86,8 @@ examples/mcp-opa-callout/
 │   ├── Dockerfile                         # Compiles external_callout.proto via grpc_tools.protoc
 │   ├── external_callout.proto             # Official Apigee ExternalCalloutService contract
 │   ├── requirements.txt
-│   └── server.py                          # Switchable partial vs. echo mode + MCP ABAC policy
-└── apiproxy/                              # Sanitized Apigee proxy bundle (both Fix A & Fix B modes)
+│   └── server.py                          # Option A (echo default) + switchable partial mode & MCP ABAC policy
+└── apiproxy/                              # Sanitized Apigee proxy bundle (both Option A & Option B modes)
     ├── mcp-opa-callout.xml
     ├── policies/
     │   ├── AM-BackupRequestContext.xml
@@ -195,43 +205,19 @@ Wait ~15–20 seconds for the revision deployment state to become `READY`.
 
 ## 5. Verify Every Scenario Live
 
-### 1. Reproduce the Overwrite Bug (`x-callout-mode: partial`)
-The gRPC server inspects all `112` bytes of the MCP payload and returns **only** `additional_flow_variables`. Notice that `target_received_content_length=0` and `target_received_body=` at the target:
+`EV-ExtractJwt` strips the `Bearer ` prefix and `JWT-DecodeCaller` (`DecodeJWT`) extracts `sub` and `role` claims from any 3-segment JWT without requiring an IdP or JWKS setup for the demo (in production, replace `DecodeJWT` with `VerifyJWT` + JWKS). `EC-OpaPolicy` forwards those claims as `<FlowVariable>` entries, while requests without an `Authorization` header fall back to `x-caller-role`. On the Cloud Run gRPC server, `CALLOUT_MODE` sets the server default (`echo` or `partial`, defaulting to `echo`), and per-request `x-callout-mode` overrides it.
+
+### 1. Verify Option A — Primary Pattern (`CALLOUT_MODE=echo` Default)
+With no override headers, the gRPC server echoes `request` and `target` alongside `additional_flow_variables`. Target receives `HTTP 200` and all `112` bytes intact (`x-callout-mode: echo`):
 
 ```bash
 curl -si -X POST "https://${APIGEE_HOST}/mcp-opa-callout/mcp" \
   -H "Content-Type: application/json" \
-  -H "x-callout-mode: partial" \
   -H "x-caller-role: support_agent" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_order","arguments":{"order_id":"ORD-1001"}}}'
 ```
 
-### 2. Verify Option A (`x-callout-mode: echo`)
-The gRPC server echoes `request` and `target` alongside `additional_flow_variables`. Target receives `HTTP 200` and all `112` bytes intact:
-
-```bash
-curl -si -X POST "https://${APIGEE_HOST}/mcp-opa-callout/mcp" \
-  -H "Content-Type: application/json" \
-  -H "x-callout-mode: echo" \
-  -H "x-caller-role: support_agent" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_order","arguments":{"order_id":"ORD-1001"}}}'
-```
-
-### 3. Verify Option B (`x-callout-mode: partial` + `x-gateway-fix: backup-restore`)
-Even while the gRPC server returns only `additional_flow_variables`, `AM-BackupRequestContext` + `AM-RestoreTargetFlags` + `AM-RestoreRequestPayload` restore `request.content`, `Content-Length`, and `target.copy.*` cleanly before hitting the target:
-
-```bash
-curl -si -X POST "https://${APIGEE_HOST}/mcp-opa-callout/mcp" \
-  -H "Content-Type: application/json" \
-  -H "x-callout-mode: partial" \
-  -H "x-gateway-fix: backup-restore" \
-  -H "x-caller-role: support_agent" \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_order","arguments":{"order_id":"ORD-1001"}}}'
-```
-
-### 4. Verify MCP Tool & Argument `ABAC` via Decoded JWT Claims (`403` vs `200`)
-
-`EV-ExtractJwt` strips the `Bearer ` prefix and `JWT-DecodeCaller` (`DecodeJWT`) extracts `sub` and `role` claims from any 3-segment JWT without requiring an IdP or JWKS setup for the demo (in production, replace `DecodeJWT` with `VerifyJWT` + JWKS). `EC-OpaPolicy` forwards those claims as `<FlowVariable>` entries, while requests without an `Authorization` header fall back to `x-caller-role`. On the Cloud Run gRPC server, `CALLOUT_MODE` sets the server default (`partial` or `echo`, defaulting to `partial`), and per-request `x-callout-mode` overrides it.
+### 2. Verify MCP Tool & Argument `ABAC` via Decoded JWT Claims (`403` vs `200`)
 
 ```bash
 # Helper to build a 3-segment test JWT (Apigee DecodeJWT expects a non-empty signature segment)
@@ -244,16 +230,37 @@ print(b64({"alg":"HS256","typ":"JWT"}) + "." + b64({"sub":sys.argv[1],"role":sys
 # Denied (support_agent refund > 250) -> HTTP 403 JSON-RPC error
 curl -si -X POST "https://${APIGEE_HOST}/mcp-opa-callout/mcp" \
   -H "Content-Type: application/json" \
-  -H "x-callout-mode: echo" \
   -H "Authorization: Bearer $(make_jwt 'alice@example.com' 'support_agent')" \
   -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"issue_refund","arguments":{"order_id":"ORD-1001","amount":500,"reason":"damaged"}}}'
 
 # Allowed (finance_approver refund > 250) -> HTTP 200 w/ X-Identity-Source: jwt_flow_variable
 curl -si -X POST "https://${APIGEE_HOST}/mcp-opa-callout/mcp" \
   -H "Content-Type: application/json" \
-  -H "x-callout-mode: echo" \
   -H "Authorization: Bearer $(make_jwt 'bob@example.com' 'finance_approver')" \
   -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"issue_refund","arguments":{"order_id":"ORD-1001","amount":500,"reason":"damaged"}}}'
+```
+
+### 3. Reproduce the Decision-Only Overwrite Gotcha (`x-callout-mode: partial`)
+Simulate a decision-only gRPC server that inspects all `112` bytes of the MCP payload and returns **only** `additional_flow_variables`. Notice that `target_received_content_length=0` and `target_received_body=` at the target because proto3 default values overwrite `request.content`:
+
+```bash
+curl -si -X POST "https://${APIGEE_HOST}/mcp-opa-callout/mcp" \
+  -H "Content-Type: application/json" \
+  -H "x-callout-mode: partial" \
+  -H "x-caller-role: support_agent" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_order","arguments":{"order_id":"ORD-1001"}}}'
+```
+
+### 4. Verify Option B — Defensive Proxy Save/Restore (`x-callout-mode: partial` + `x-gateway-fix: backup-restore`)
+Even while the gRPC server returns only `additional_flow_variables`, `AM-BackupRequestContext` + `AM-RestoreTargetFlags` + `AM-RestoreRequestPayload` restore `request.content`, `Content-Length`, and `target.copy.*` cleanly before hitting the target:
+
+```bash
+curl -si -X POST "https://${APIGEE_HOST}/mcp-opa-callout/mcp" \
+  -H "Content-Type: application/json" \
+  -H "x-callout-mode: partial" \
+  -H "x-gateway-fix: backup-restore" \
+  -H "x-caller-role: support_agent" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"get_order","arguments":{"order_id":"ORD-1001"}}}'
 ```
 
 ---
