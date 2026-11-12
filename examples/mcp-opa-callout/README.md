@@ -53,12 +53,17 @@ When integrating a custom gRPC server via [`external_callout.proto`](grpc-servic
 2. **`target.copy.pathsuffix` and `target.copy.queryparams` reset to `false`:** Leaving `target` unset applies Protobuf default booleans (`false`).
 3. **`<RequestVariable>` and `<ResponseVariable>` have no effect:** Unlike [`ServiceCallout`](https://docs.cloud.google.com/apigee/docs/api-platform/reference/policies/service-callout-policy), the [`ExternalCallout` schema](https://docs.cloud.google.com/apigee/docs/api-platform/reference/policies/external-callout-policy) does not define `<RequestVariable>` or `<ResponseVariable>`. Setting them on `ExternalCallout` is silently ignored, and `with.request.content` / `with.request.headers` filter **outbound** data only.
 
-### Two Verified Solutions
+### Two Verified Solutions (Which Should You Use?)
 
 | Approach | How It Works | Key Tradeoff & Caveat |
 | :--- | :--- | :--- |
-| **Option A: gRPC Server Echoes Context** | Return `MessageContext(request=incoming.request, target=incoming.target, additional_flow_variables=...)` ([`server.py`](grpc-service/server.py)). | **Zero proxy changes**, **but** requires keeping `<Property name="with.request.content">true</Property>` and `with.request.headers=true`. If `with.request.content` is `false`, `incoming.request.content` arrives empty and echoing it back still wipes `request.content`. |
-| **Option B: Gateway `AssignMessage` Backup/Restore** | Snapshot `request.content`, `target.copy.pathsuffix`, and `target.copy.queryparams` into custom flow variables before `ExternalCallout`, then restore via `<AssignVariable><Ref>` immediately after. | **Zero dependency on the gRPC team**; safely preserves raw JSON bytes without template parsing and automatically recalculates `Content-Length`. |
+| **Option A: gRPC Server Echoes Context** | Return `MessageContext(request=incoming.request, target=incoming.target, additional_flow_variables=...)` ([`server.py`](grpc-service/server.py)). | **Zero proxy changes**, **but** sends request bodies both directions over gRPC and requires keeping `<Property name="with.request.content">true</Property>` and `with.request.headers=true`. If `with.request.content` is `false`, `incoming.request.content` arrives empty and echoing it back still wipes `request.content`. |
+| **Option B: Gateway `AssignMessage` Backup/Restore** | Snapshot `request.content`, `target.copy.pathsuffix`, and `target.copy.queryparams` into custom flow variables before `ExternalCallout`, then restore via `<AssignVariable><Ref>` immediately after. | **Keeps the gRPC authz service decision-only** (no need to echo payloads back over gRPC, works even if `with.request.content` is `false`, safely preserves raw JSON bytes, and automatically recalculates `Content-Length`). |
+
+- **When to choose Option A:** Your OPA/authz gRPC server returns `request` and `target` alongside `additional_flow_variables` (or intentionally mutates headers/payloads in-flight). Deploy just `EC-OpaPolicy` + `RF-OpaDenied`.
+- **When to choose Option B:** Your OPA/authz gRPC server returns **only** `additional_flow_variables` (staying lightweight and decision-only) or you want to disable `with.request.content` without breaking backends. Keep `AM-BackupRequestContext` → `EC-OpaPolicy` → `AM-RestoreTargetFlags` → `AM-RestoreRequestPayload` in your proxy or SharedFlow.
+
+> **How this single demo proxy covers both scenarios:** Instead of maintaining duplicate proxy bundles, [`apiproxy/proxies/default.xml`](apiproxy/proxies/default.xml) and [`server.py`](grpc-service/server.py) toggle both behaviors via request headers (`x-callout-mode` and `x-gateway-fix`) so you can verify all three paths against one deployment. When lifting **Option B** into a production proxy or SharedFlow, remove `request.header.x-gateway-fix == "backup-restore"` from the `<Condition>` expressions on `AM-BackupRequestContext`, `AM-RestoreTargetFlags`, and `AM-RestoreRequestPayload` (or replace it with a KVM toggle).
 
 ---
 
